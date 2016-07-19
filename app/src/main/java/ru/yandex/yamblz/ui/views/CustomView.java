@@ -56,13 +56,18 @@ public class CustomView extends FrameLayout {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             totalDistanceX+=distanceX;
             if(totalDistanceX<0)return true;
-
+            //rotation in degrees
             float rotation=-totalDistanceX/totalWidth*45;
             float movement= -totalDistanceX/totalWidth* totalWidth*1.3f;
             float alpha=Math.min(1,totalDistanceX/totalWidth*2f);
+            float deleteMovement=+totalDistanceX/totalWidth* totalWidth*0.5f;
+            if(deleteMovement>totalWidth*0.15f){
+                deleteMovement=totalWidth*0.15f-(deleteMovement-totalWidth*0.15f);
+            }
+            deleteMovement=Math.max(deleteMovement,0);
             imageView.setRotation(rotation);
             imageView.animate().rotation(rotation).translationX(movement).setDuration(0);
-            delete.animate().alpha(alpha).setDuration(0);
+            delete.animate().alpha(alpha).translationX(deleteMovement).setDuration(0);
             Log.d("ScrollLIstener",String.format("distanceX:%s rotation:%s movement:%s alpha:%s",
                     totalDistanceX,rotation,movement,alpha));
             return true;
@@ -76,8 +81,8 @@ public class CustomView extends FrameLayout {
 
         private boolean onUp(MotionEvent e){
             Log.d("ScrollListener","up");
-            imageView.animate().setDuration(0).rotation(0).translationX(0);
-            delete.animate().alpha(0).setDuration(0);
+            imageView.animate().setDuration(1000).rotation(0).translationX(0);
+            delete.animate().setDuration(1000).alpha(0).translationX(0);
             return true;
         }
 
