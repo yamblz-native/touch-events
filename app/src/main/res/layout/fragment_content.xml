@@ -1,14 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/content"
+        android:id="@+id/end_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="No pain,\nNo animations"
         android:textSize="42sp"
-        android:gravity="center"
-        />
+        android:visibility="gone"/>
 
+    <ru.yandex.yamblz.ui.views.BetterFrameLayout
+        android:id="@+id/frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/background_image_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:alpha="0"
+            android:src="@drawable/ic_block_black_24dp"/>
+
+        <FrameLayout
+            android:id="@+id/small_frame_layout"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_power_black_24dp"/>
+
+            <ScrollView
+                android:id="@+id/scroll_view"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center">
+
+                <TextView
+                    android:id="@+id/text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"/>
+            </ScrollView>
+        </FrameLayout>
+    </ru.yandex.yamblz.ui.views.BetterFrameLayout>
 </FrameLayout>
