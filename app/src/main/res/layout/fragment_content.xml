@@ -29,6 +29,7 @@
         <FrameLayout
             android:id="@+id/small_frame_layout"
             android:layout_width="wrap_content"
+            android:layout_gravity="center"
             android:layout_height="wrap_content">
 
             <ImageView
