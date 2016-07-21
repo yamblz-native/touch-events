@@ -20,6 +20,7 @@ public class DismissableLayout extends FrameLayout {
 
     private int mTouchSlop;
     private float mLastX, mLastY;
+    private float mDownX, mDownY;
     private int mDragCrossAxis;
     private int mDragMainAxis;
     private VelocityTracker mVelocityTracker;
@@ -119,7 +120,9 @@ public class DismissableLayout extends FrameLayout {
                     mLastY = y;
                     if(mDragMainAxis == HORIZONTAL) {
                         if (draggingStart(diffX) || draggingEnd(diffX)) {
+                            final float width = getWidth();
                             setTranslationX(getTranslationX() + diffX);
+                            setRotation(getRotation() + 0.2f * diffX / width * 180);
                         } else {
                             if (exceedsTouchSlop(diffX)) {
                                 mDragCrossAxis = (diffX < 0 ? START : END);
@@ -155,6 +158,8 @@ public class DismissableLayout extends FrameLayout {
             case MotionEvent.ACTION_DOWN:
                 mLastX = ev.getX();
                 mLastY = ev.getY();
+                mDownX = ev.getX();
+                mDownY = ev.getY();
                 mVelocityTracker.clear();
                 mVelocityTracker.addMovement(ev);
                 return false;
