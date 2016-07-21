@@ -4,11 +4,28 @@
              android:layout_height="match_parent">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_marginTop="-50dp"
+        android:layout_gravity="center"
+        android:id="@+id/btnDelete"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:text="@string/delete_text"
+        android:background="@drawable/btn_delete"
+        android:gravity="center"
+        android:textColor="#FFF"
+
+        />
+
+    <ImageView
+        android:id="@+id/toDrag"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:text="@string/content"
         android:textSize="42sp"
+        android:src="@drawable/card"
+        android:scaleType="centerCrop"
         android:gravity="center"
-        />
+        android:layout_gravity="center"
+        android:contentDescription="@string/card" />
 
 </FrameLayout>
