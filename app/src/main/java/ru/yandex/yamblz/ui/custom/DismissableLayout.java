@@ -1,6 +1,7 @@
 package ru.yandex.yamblz.ui.custom;
 
 import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -62,9 +63,8 @@ public class DismissableLayout extends FrameLayout {
     private void init(Context context) {
         mEndColor = ContextCompat.getColor(context, android.R.color.holo_red_dark);
         mEvaluator = new ArgbEvaluator();
-        mValueAnimator = ValueAnimator.ofObject(mEvaluator);
-        mValueAnimator.addUpdateListener((ValueAnimator animation) ->
-                setBackgroundColor((Integer)animation.getAnimatedValue()));
+        mValueAnimator = ObjectAnimator.ofInt(this, "backgroundColor", 0);
+        mValueAnimator.setEvaluator(mEvaluator);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
@@ -187,8 +187,7 @@ public class DismissableLayout extends FrameLayout {
         animate().translationX(0).setDuration(duration).start();
         if(mStartColor != null) {
             mValueAnimator.setIntValues(getBackgroundColor(), mStartColor);
-            mValueAnimator.setDuration(duration);
-            mValueAnimator.start();
+            mValueAnimator.setDuration(duration).start();
         }
     }
 
