@@ -10,12 +10,17 @@ import android.widget.FrameLayout;
 
 public class DismissableLayout extends FrameLayout {
 
+    private static final int HORIZONTAL = 0;
+    private static final int VERTICAL = 1;
+    private static final int NO = 2;
+
+    private static final int START = 0;
+    private static final int END = 1;
+
     private int mTouchSlop;
     private float mLastX;
-    private int mDragDirection;
-    private static final int LEFT = 0;
-    private static final int RIGHT = 1;
-    private boolean mDragging;
+    private int mDragCrossAxis;
+    private int mDragMainAxis;
     private VelocityTracker mVelocityTracker;
 
     public DismissableLayout(Context context) {
@@ -39,11 +44,11 @@ public class DismissableLayout extends FrameLayout {
     }
 
     private boolean draggingLeft(float diff) {
-        return mDragging && mDragDirection == LEFT && diff < 0;
+        return mDragMainAxis != NO && mDragCrossAxis == START && diff < 0;
     }
 
     private boolean draggingRight(float diff) {
-        return mDragging && mDragDirection == RIGHT && diff > 0;
+        return mDragMainAxis != NO && mDragCrossAxis == END && diff > 0;
     }
 
     @Override
@@ -58,23 +63,23 @@ public class DismissableLayout extends FrameLayout {
                 mVelocityTracker.addMovement(event);
                 final float x = event.getX();
                 float diffX = x - mLastX;
-                if(!mDragging && Math.abs(diffX) > mTouchSlop) {
-                    mDragging = true;
-                    mDragDirection = (diffX < 0 ? LEFT : RIGHT);
+                if(mDragMainAxis != NO && Math.abs(diffX) > mTouchSlop) {
+                    mDragMainAxis = HORIZONTAL;
+                    mDragCrossAxis = (diffX < 0 ? START : END);
                 }
                 if(draggingLeft(diffX) || draggingRight(diffX)) {
                     setTranslationX(getTranslationX() + diffX);
                     mLastX = x;
                 } else {
-                    if(mDragging && Math.abs(diffX) > mTouchSlop) {
-                        mDragDirection = (diffX < 0 ? LEFT : RIGHT);
+                    if(mDragMainAxis != NO && Math.abs(diffX) > mTouchSlop) {
+                        mDragCrossAxis = (diffX < 0 ? START : END);
                         setTranslationX(getTranslationX() + diffX);
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                mDragging = false;
+                mDragMainAxis = NO;
                 mVelocityTracker.clear();
                 break;
         }
@@ -93,8 +98,8 @@ public class DismissableLayout extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 float diffX = ev.getX() - mLastX;
                 if(Math.abs(diffX) > mTouchSlop) {
-                    mDragging = true;
-                    mDragDirection = diffX < 0 ? LEFT : RIGHT;
+                    mDragMainAxis = HORIZONTAL;
+                    mDragCrossAxis = diffX < 0 ? START : END;
                     return true;
                 }
                 break;
