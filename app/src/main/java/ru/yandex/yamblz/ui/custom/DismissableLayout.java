@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 /**
@@ -28,9 +27,14 @@ public class DismissableLayout extends FrameLayout {
     //No scroll
     private static final int NO = 2;
 
+    //Max duration of the return animation
     private static final float RETURN_DURATION = 300f;
 
+    //How much can the layout be rotated
     private static final float ANGLE_CONSTRAINT = -90f;
+
+    //How fast the view will be rotated, the more the faster
+    private static final float ROTATION_MULTIPLE = 0.3f;
 
     //Touch slop from ViewConfiguration
     private int mTouchSlop;
@@ -42,7 +46,13 @@ public class DismissableLayout extends FrameLayout {
     private ArgbEvaluator mEvaluator;
     private ValueAnimator mValueAnimator;
 
+    //The color at the end of the gesture
     private Integer mEndColor;
+
+    /**
+     * The original color of the view, can be {@code null} if an image is set for background.
+     * In that case no color animation will be shown.
+     */
     private Integer mStartColor;
 
     public DismissableLayout(Context context) {
@@ -68,10 +78,16 @@ public class DismissableLayout extends FrameLayout {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
+    /**
+     * Checks whether diff exceeds TouchSlop
+     * @param diff value to check
+     * @return {@code true} if exceeds
+     */
     private boolean exceedsTouchSlop(float diff) {
         return Math.abs(diff) > mTouchSlop;
     }
 
+    //Make child's height as mush as it wants to have
     @Override
     protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
         int childWidthMeasureSpec;
@@ -84,6 +100,7 @@ public class DismissableLayout extends FrameLayout {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
+    //Make child's height as mush as it wants to have
     @Override
     protected void measureChildWithMargins(View child, int parentWidthMeasureSpec, int widthUsed,
                                            int parentHeightMeasureSpec, int heightUsed) {
@@ -110,16 +127,26 @@ public class DismissableLayout extends FrameLayout {
         return maxHeight;
     }
 
+    /**
+     * Changes background color depending on the rotation (forward animation)
+     */
+    private void changeBackgroundOnForwardAnimation() {
+        if(mStartColor != null) {
+            setBackgroundColor((Integer)mEvaluator.evaluate(getRotation() / ANGLE_CONSTRAINT,
+                    mStartColor, mEndColor));
+        }
+    }
+
     @Override
     public void scrollBy(int x, int y) {
         final int maxHeight = getChildMaxHeight();
-
         int scrollY;
-        //Need this if so not to go out of layout boundaries
+        int paddings = getPaddingBottom() + getPaddingTop();
+        //Need this so not to go out of layout boundaries
         if(y < 0) {
             scrollY = Math.max(-getScrollY(), y);
         } else {
-            scrollY = Math.min(maxHeight - getHeight() - getScrollY(), y);
+            scrollY = Math.min(maxHeight - getHeight() - getScrollY() + paddings, y);
             scrollY = Math.max(0, scrollY); //if {@code maxHeight < getHeight()} the result would be negative
         }
 
@@ -129,48 +156,55 @@ public class DismissableLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.e("TAG", "ON TOUCH " + event.getAction());
         switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                //if down returned to us from children, then we need to handle, so not to lose it
                 return true;
             case MotionEvent.ACTION_MOVE:
-                final float x = event.getRawX(); //getX() not working because we move container, so center moves with it. if layout was fixed it would be nice
+                //getX() not working because we move container, so center moves with it. if layout was fixed it would be nice
+                final float x = event.getRawX();
                 final float y = event.getRawY();
                 final float diffX = x - mLastX;
                 final float diffY = y - mLastY;
                 final boolean exceedsX = exceedsTouchSlop(diffX);
                 final boolean exceedsY = exceedsTouchSlop(diffY);
 
+                //if not scrolling
                 if(mDragMainAxis == NO) {
+                    //do not know what to do in this case, ignore it
                     if(exceedsX && exceedsY) {
                         break;
                     }
+                    //choose needed direction
                     if(exceedsX) {
                         mDragMainAxis = HORIZONTAL;
                     } else if(exceedsY) {
                         mDragMainAxis = VERTICAL;
                     }
                 }
+                //if scrolling
                 if(mDragMainAxis != NO) {
                     mLastX = x;
                     mLastY = y;
                     if(mDragMainAxis == HORIZONTAL) {
+                        //the translation after moving
                         final float translationX = getTranslationX() + diffX;
-                        final float rotation = getRotation() + 0.2f * diffX / getWidth() * 180;
+                        //the angle in degrees to rotate on
+                        final float rotation = getRotation() + ROTATION_MULTIPLE * (diffX / getWidth()) * 180;
                         if(translationX <= 0 && rotation >= ANGLE_CONSTRAINT) {
                             setTranslationX(translationX);
                             setRotation(rotation);
-                            if(mStartColor != null) {
-                                setBackgroundColor((Integer)mEvaluator.evaluate(rotation / ANGLE_CONSTRAINT, mStartColor, mEndColor));
-                            }
+                            changeBackgroundOnForwardAnimation();
                         }
                     } else {
+                        //otherwise scroll vertically
                         scrollBy(0, (int)-diffY);
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                //run reverse animation
                 mDragMainAxis = NO;
                 returnToStartPosition();
                 break;
@@ -179,10 +213,18 @@ public class DismissableLayout extends FrameLayout {
     }
 
     /**
+     * Calculates duration of the reverse animation using {@link #getRotation()}
+     * @return the duration
+     */
+    private long calculateDurationOfReverseAnimation() {
+        return (long)(getRotation() / ANGLE_CONSTRAINT * RETURN_DURATION);
+    }
+
+    /**
      * Returns layout to source position
      */
     private void returnToStartPosition() {
-        final long duration = (long)(getRotation() / ANGLE_CONSTRAINT * RETURN_DURATION);
+        final long duration = calculateDurationOfReverseAnimation();
         animate().rotation(0).setDuration(duration).start();
         animate().translationX(0).setDuration(duration).start();
         if(mStartColor != null) {
@@ -191,6 +233,10 @@ public class DismissableLayout extends FrameLayout {
         }
     }
 
+    /**
+     * Returns background color
+     * @return background color, or {@code null} if an image is set
+     */
     @Nullable private Integer getBackgroundColor() {
         Drawable background = getBackground();
         Integer color = null;
@@ -202,21 +248,26 @@ public class DismissableLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.e("TAG", "ON INTERCEPT " + ev.getAction());
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                //if down we need to remember coordinates to detect scroll
                 mLastX = ev.getRawX();
                 mLastY = ev.getRawY();
+                //we need to remember color to animate changing of background
                 mStartColor = getBackgroundColor();
+                //don't need to intercept touch on down, because the children may need it
                 return false;
             case MotionEvent.ACTION_MOVE:
-                float diffX = ev.getRawX() - mLastX;
-                float diffY = ev.getRawY() - mLastY;
+                final float diffX = ev.getRawX() - mLastX;
+                final float diffY = ev.getRawY() - mLastY;
                 final boolean exceedsX = exceedsTouchSlop(diffX);
                 final boolean exceedsY = exceedsTouchSlop(diffY);
+
+                //if both directions exceeded then we do not know what to do
                 if(exceedsX && exceedsY) {
                     break;
                 }
+                //otherwise we intercept the touch
                 if(exceedsX) {
                     mDragMainAxis = HORIZONTAL;
                     return true;
