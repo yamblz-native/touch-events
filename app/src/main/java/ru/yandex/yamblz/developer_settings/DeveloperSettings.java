@@ -2,6 +2,7 @@ package ru.yandex.yamblz.developer_settings;
 
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.view.ViewGroup;
 
 /**
  * Wrapper over {@link android.content.SharedPreferences} to store developer settings.
