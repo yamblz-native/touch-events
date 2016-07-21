@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
 
@@ -18,7 +19,7 @@ public class DismissableLayout extends FrameLayout {
     private static final int END = 1;
 
     private int mTouchSlop;
-    private float mLastX;
+    private float mLastX, mLastY;
     private int mDragCrossAxis;
     private int mDragMainAxis;
     private VelocityTracker mVelocityTracker;
@@ -43,12 +44,46 @@ public class DismissableLayout extends FrameLayout {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
-    private boolean draggingLeft(float diff) {
+    private boolean draggingStart(float diff) {
         return mDragMainAxis != NO && mDragCrossAxis == START && diff < 0;
     }
 
-    private boolean draggingRight(float diff) {
+    private boolean draggingEnd(float diff) {
         return mDragMainAxis != NO && mDragCrossAxis == END && diff > 0;
+    }
+
+    private boolean exceedsTouchSlop(float diff) {
+        return Math.abs(diff) > mTouchSlop;
+    }
+
+    /*
+     * Override the measureChild... implementations to guarantee that the child view
+     * gets measured to be as large as it wants to be.  The default implementation will
+     * force some children to be only as large as this view.
+     */
+    @Override
+    protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
+        int childWidthMeasureSpec;
+        int childHeightMeasureSpec;
+
+        childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+                getPaddingLeft() + getPaddingRight(), child.getLayoutParams().width);
+        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    }
+
+    @Override
+    protected void measureChildWithMargins(View child, int parentWidthMeasureSpec, int widthUsed,
+                                           int parentHeightMeasureSpec, int heightUsed) {
+        final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+
+        final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+                getPaddingLeft() + getPaddingRight(), child.getLayoutParams().width);
+        final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                lp.topMargin + lp.bottomMargin, MeasureSpec.UNSPECIFIED);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
     @Override
@@ -62,24 +97,51 @@ public class DismissableLayout extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
                 final float x = event.getX();
-                float diffX = x - mLastX;
-                if(mDragMainAxis != NO && Math.abs(diffX) > mTouchSlop) {
-                    mDragMainAxis = HORIZONTAL;
-                    mDragCrossAxis = (diffX < 0 ? START : END);
-                }
-                if(draggingLeft(diffX) || draggingRight(diffX)) {
-                    setTranslationX(getTranslationX() + diffX);
-                    mLastX = x;
-                } else {
-                    if(mDragMainAxis != NO && Math.abs(diffX) > mTouchSlop) {
+                final float y = event.getY();
+                final float diffX = x - mLastX;
+                final float diffY = y - mLastY;
+
+                if(mDragMainAxis == NO) {
+                    if(exceedsTouchSlop(diffX) && exceedsTouchSlop(diffY)) {
+                        break;
+                    }
+                    if(exceedsTouchSlop(diffX)) {
+                        mDragMainAxis = HORIZONTAL;
                         mDragCrossAxis = (diffX < 0 ? START : END);
-                        setTranslationX(getTranslationX() + diffX);
+                    } else if(exceedsTouchSlop(diffY)) {
+                        mDragMainAxis = VERTICAL;
+                        mDragCrossAxis = (diffY < 0 ? START : END);
+                    }
+                }
+
+                if(mDragMainAxis != NO) {
+                    mLastX = x;
+                    mLastY = y;
+                    if(mDragMainAxis == HORIZONTAL) {
+                        if (draggingStart(diffX) || draggingEnd(diffX)) {
+                            setTranslationX(getTranslationX() + diffX);
+                        } else {
+                            if (exceedsTouchSlop(diffX)) {
+                                mDragCrossAxis = (diffX < 0 ? START : END);
+                                setTranslationX(getTranslationX() + diffX);
+                            }
+                        }
+                    } else {
+                        if (draggingStart(diffY) || draggingEnd(diffY)) {
+                            scrollBy(0, (int)-diffY);
+                        } else {
+                            if (exceedsTouchSlop(diffY)) {
+                                mDragCrossAxis = (diffY < 0 ? START : END);
+                                scrollBy(0, (int)-diffY);
+                            }
+                        }
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mDragMainAxis = NO;
+                mDragCrossAxis = NO;
                 mVelocityTracker.clear();
                 break;
         }
@@ -91,15 +153,24 @@ public class DismissableLayout extends FrameLayout {
         Log.e("TAG", "ON INTERCEPT " + ev.getAction());
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mLastX = (int)ev.getX();
+                mLastX = ev.getX();
+                mLastY = ev.getY();
                 mVelocityTracker.clear();
                 mVelocityTracker.addMovement(ev);
                 return false;
             case MotionEvent.ACTION_MOVE:
                 float diffX = ev.getX() - mLastX;
-                if(Math.abs(diffX) > mTouchSlop) {
+                float diffY = ev.getY() - mLastY;
+                if(exceedsTouchSlop(diffX) && exceedsTouchSlop(diffY)) {
+                    break;
+                }
+                if(exceedsTouchSlop(diffX)) {
                     mDragMainAxis = HORIZONTAL;
                     mDragCrossAxis = diffX < 0 ? START : END;
+                    return true;
+                } else if(exceedsTouchSlop(diffY)) {
+                    mDragMainAxis = VERTICAL;
+                    mDragCrossAxis = diffY < 0 ? START : END;
                     return true;
                 }
                 break;
