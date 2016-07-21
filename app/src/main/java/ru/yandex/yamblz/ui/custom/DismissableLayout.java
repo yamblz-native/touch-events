@@ -15,12 +15,8 @@ public class DismissableLayout extends FrameLayout {
     private static final int VERTICAL = 1;
     private static final int NO = 2;
 
-    private static final int START = 0;
-    private static final int END = 1;
-
     private int mTouchSlop;
     private float mLastX, mLastY;
-    private int mDragCrossAxis;
     private int mDragMainAxis;
     private VelocityTracker mVelocityTracker;
 
@@ -47,7 +43,7 @@ public class DismissableLayout extends FrameLayout {
     private boolean exceedsTouchSlop(float diff) {
         return Math.abs(diff) > mTouchSlop;
     }
-    
+
     @Override
     protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
         int childWidthMeasureSpec;
@@ -73,6 +69,31 @@ public class DismissableLayout extends FrameLayout {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
+    private int getChildMaxHeight() {
+        final int childCount = getChildCount();
+        int maxHeight = 0;
+        for(int i = 0; i < childCount; i++) {
+            maxHeight = Math.max(getChildAt(i).getHeight(), maxHeight);
+        }
+        return maxHeight;
+    }
+
+    @Override
+    public void scrollBy(int x, int y) {
+        final int maxHeight = getChildMaxHeight();
+
+        int scrollY;
+        if(y < 0) {
+            scrollY = Math.max(-getScrollY(), y);
+        } else {
+            scrollY = Math.min(maxHeight - getHeight() - getScrollY(), y);
+            scrollY = Math.max(0, scrollY);
+        }
+
+        super.scrollBy(x, scrollY);
+
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.e("TAG", "ON TOUCH " + event.getAction());
@@ -96,10 +117,8 @@ public class DismissableLayout extends FrameLayout {
                     }
                     if(exceedsX) {
                         mDragMainAxis = HORIZONTAL;
-                        mDragCrossAxis = (diffX < 0 ? START : END);
                     } else if(exceedsY) {
                         mDragMainAxis = VERTICAL;
-                        mDragCrossAxis = (diffY < 0 ? START : END);
                     }
                 }
                 if(mDragMainAxis != NO) {
@@ -111,13 +130,13 @@ public class DismissableLayout extends FrameLayout {
                         setRotation(getRotation() + 0.2f * diffX / width * 180);
                     } else {
                         scrollBy(0, (int)-diffY);
+                        Log.e("TAG", "SCROLL " + getScrollX() + " " + getScrollY());
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mDragMainAxis = NO;
-                mDragCrossAxis = NO;
                 mVelocityTracker.clear();
                 break;
         }
@@ -144,11 +163,9 @@ public class DismissableLayout extends FrameLayout {
                 }
                 if(exceedsX) {
                     mDragMainAxis = HORIZONTAL;
-                    mDragCrossAxis = diffX < 0 ? START : END;
                     return true;
                 } else if(exceedsY) {
                     mDragMainAxis = VERTICAL;
-                    mDragCrossAxis = diffY < 0 ? START : END;
                     return true;
                 }
                 break;
