@@ -20,7 +20,6 @@ public class DismissableLayout extends FrameLayout {
 
     private int mTouchSlop;
     private float mLastX, mLastY;
-    private float mDownX, mDownY;
     private int mDragCrossAxis;
     private int mDragMainAxis;
     private VelocityTracker mVelocityTracker;
@@ -45,23 +44,10 @@ public class DismissableLayout extends FrameLayout {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
-    private boolean draggingStart(float diff) {
-        return mDragMainAxis != NO && mDragCrossAxis == START && diff < 0;
-    }
-
-    private boolean draggingEnd(float diff) {
-        return mDragMainAxis != NO && mDragCrossAxis == END && diff > 0;
-    }
-
     private boolean exceedsTouchSlop(float diff) {
         return Math.abs(diff) > mTouchSlop;
     }
-
-    /*
-     * Override the measureChild... implementations to guarantee that the child view
-     * gets measured to be as large as it wants to be.  The default implementation will
-     * force some children to be only as large as this view.
-     */
+    
     @Override
     protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
         int childWidthMeasureSpec;
@@ -97,47 +83,34 @@ public class DismissableLayout extends FrameLayout {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
-                final float x = event.getX();
-                final float y = event.getY();
+                final float x = event.getRawX(); //getX() not working because we move container, so center with it. if it was fixed it would be nice
+                final float y = event.getRawY();
                 final float diffX = x - mLastX;
                 final float diffY = y - mLastY;
+                final boolean exceedsX = exceedsTouchSlop(diffX);
+                final boolean exceedsY = exceedsTouchSlop(diffY);
 
                 if(mDragMainAxis == NO) {
-                    if(exceedsTouchSlop(diffX) && exceedsTouchSlop(diffY)) {
+                    if(exceedsX && exceedsY) {
                         break;
                     }
-                    if(exceedsTouchSlop(diffX)) {
+                    if(exceedsX) {
                         mDragMainAxis = HORIZONTAL;
                         mDragCrossAxis = (diffX < 0 ? START : END);
-                    } else if(exceedsTouchSlop(diffY)) {
+                    } else if(exceedsY) {
                         mDragMainAxis = VERTICAL;
                         mDragCrossAxis = (diffY < 0 ? START : END);
                     }
                 }
-
                 if(mDragMainAxis != NO) {
                     mLastX = x;
                     mLastY = y;
                     if(mDragMainAxis == HORIZONTAL) {
-                        if (draggingStart(diffX) || draggingEnd(diffX)) {
-                            final float width = getWidth();
-                            setTranslationX(getTranslationX() + diffX);
-                            setRotation(getRotation() + 0.2f * diffX / width * 180);
-                        } else {
-                            if (exceedsTouchSlop(diffX)) {
-                                mDragCrossAxis = (diffX < 0 ? START : END);
-                                setTranslationX(getTranslationX() + diffX);
-                            }
-                        }
+                        final float width = getWidth();
+                        setTranslationX(getTranslationX() + diffX);
+                        setRotation(getRotation() + 0.2f * diffX / width * 180);
                     } else {
-                        if (draggingStart(diffY) || draggingEnd(diffY)) {
-                            scrollBy(0, (int)-diffY);
-                        } else {
-                            if (exceedsTouchSlop(diffY)) {
-                                mDragCrossAxis = (diffY < 0 ? START : END);
-                                scrollBy(0, (int)-diffY);
-                            }
-                        }
+                        scrollBy(0, (int)-diffY);
                     }
                 }
                 break;
@@ -156,24 +129,24 @@ public class DismissableLayout extends FrameLayout {
         Log.e("TAG", "ON INTERCEPT " + ev.getAction());
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mLastX = ev.getX();
-                mLastY = ev.getY();
-                mDownX = ev.getX();
-                mDownY = ev.getY();
+                mLastX = ev.getRawX();
+                mLastY = ev.getRawY();
                 mVelocityTracker.clear();
                 mVelocityTracker.addMovement(ev);
                 return false;
             case MotionEvent.ACTION_MOVE:
-                float diffX = ev.getX() - mLastX;
-                float diffY = ev.getY() - mLastY;
-                if(exceedsTouchSlop(diffX) && exceedsTouchSlop(diffY)) {
+                float diffX = ev.getRawX() - mLastX;
+                float diffY = ev.getRawY() - mLastY;
+                final boolean exceedsX = exceedsTouchSlop(diffX);
+                final boolean exceedsY = exceedsTouchSlop(diffY);
+                if(exceedsX && exceedsY) {
                     break;
                 }
-                if(exceedsTouchSlop(diffX)) {
+                if(exceedsX) {
                     mDragMainAxis = HORIZONTAL;
                     mDragCrossAxis = diffX < 0 ? START : END;
                     return true;
-                } else if(exceedsTouchSlop(diffY)) {
+                } else if(exceedsY) {
                     mDragMainAxis = VERTICAL;
                     mDragCrossAxis = diffY < 0 ? START : END;
                     return true;
