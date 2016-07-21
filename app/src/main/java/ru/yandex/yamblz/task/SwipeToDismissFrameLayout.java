@@ -1,5 +1,7 @@
 package ru.yandex.yamblz.task;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -16,77 +18,12 @@ import ru.yandex.yamblz.R;
 
 public class SwipeToDismissFrameLayout extends FrameLayout {
 
+    private OnSwipedListener onSwipedListener;
     @IdRes private int swipeViewId;
     private View swipeView;
     @IdRes private int cancelViewId;
     private View cancelView;
     private float layoutWidth;
-
-    private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
-        boolean isScrolled = false;
-        boolean isXDirection;
-        boolean isSwiping = false;
-        boolean isFading = false;
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (!isSwiping) {
-                isScrolled = true;
-                isXDirection = Math.abs(distanceX) > Math.abs(distanceY);
-            } else if (!isFading) {
-                float ratio = swipeView.getTranslationX() / layoutWidth;
-
-                float oldTranslation = swipeView.getTranslationX();
-                swipeView.setTranslationX(oldTranslation - distanceX);
-                swipeView.setRotation(swipeView.getTranslationX() / layoutWidth * 90);
-
-                final float START_ALPHA = (float) 0.15;
-                final float FINISH_ALPHA = (float) 0.3;
-
-                if (ratio < -START_ALPHA) {
-                    cancelView.setAlpha((-ratio - START_ALPHA) / (FINISH_ALPHA - START_ALPHA));
-                } else {
-                    cancelView.setAlpha(0);
-                }
-
-                if (ratio < -FINISH_ALPHA) {
-                    ObjectAnimator animator0 = ObjectAnimator
-                            .ofFloat(swipeView, "rotation",
-                                    swipeView.getRotation(), -135)
-                            .setDuration(600);
-
-                    ObjectAnimator animator1 = ObjectAnimator
-                            .ofFloat(swipeView, "translationX",
-                                    swipeView.getTranslationX(), -layoutWidth)
-                            .setDuration(600);
-
-                    ObjectAnimator animator2 = ObjectAnimator
-                            .ofFloat(cancelView, "alpha", 1, 0)
-                            .setDuration(600);
-
-                    ObjectAnimator animator3 = ObjectAnimator
-                            .ofFloat(cancelView, "scaleX", (float) 1.0, (float) 1.5)
-                            .setDuration(600);
-
-                    ObjectAnimator animator4 = ObjectAnimator
-                            .ofFloat(cancelView, "scaleY", (float) 1.0, (float) 1.5)
-                            .setDuration(600);
-
-                    AnimatorSet animatorSet = new AnimatorSet();
-                    animatorSet.playTogether(animator0, animator1, animator2, animator3, animator4);
-                    animatorSet.start();
-
-                    isFading = true;
-                }
-            }
-            return true;
-        }
-
-        private void beginSwiping() {
-            isSwiping = true;
-        }
-    }
-
     private SwipeDetector swipeDetector;
     private GestureDetector gestureDetector;
 
@@ -98,16 +35,20 @@ public class SwipeToDismissFrameLayout extends FrameLayout {
                 .getResourceId(R.styleable.SwipeToDismissFrameLayout_swipe_view_id, 0);
         cancelViewId = typedArray
                 .getResourceId(R.styleable.SwipeToDismissFrameLayout_cancel_view_id, 0);
-        set();
+        reset();
     }
 
-    private void set() {
+    public void setOnSwipedListener(OnSwipedListener onSwipedListener) {
+        this.onSwipedListener = onSwipedListener;
+    }
+
+    private void reset() {
         swipeDetector = new SwipeDetector();
         gestureDetector = new GestureDetector(getContext(), swipeDetector);
     }
 
-    private void reset() {
-        set();
+    private void animatedViewReset() {
+        reset();
 
         ObjectAnimator animator0 = ObjectAnimator
                 .ofFloat(swipeView, "translationX", swipeView.getTranslationX(), 0)
@@ -124,6 +65,15 @@ public class SwipeToDismissFrameLayout extends FrameLayout {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animator0, animator1, animator2);
         animatorSet.start();
+    }
+
+    private void viewReset() {
+        reset();
+        swipeView.setTranslationX(0);
+        swipeView.setRotation(0);
+        cancelView.setAlpha(0);
+        cancelView.setScaleX(1);
+        cancelView.setScaleY(1);
     }
 
     @Override
@@ -160,10 +110,88 @@ public class SwipeToDismissFrameLayout extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 Log.d(this.getClass().getSimpleName(), "canceling");
                 if (!swipeDetector.isFading) {
-                    reset();
+                    animatedViewReset();
                 }
                 break;
         }
         return true;
+    }
+
+    public interface OnSwipedListener {
+        void OnSwiped(SwipeToDismissFrameLayout swipeToDismissFrameLayout);
+    }
+
+    private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
+        boolean isScrolled = false;
+        boolean isXDirection;
+        boolean isSwiping = false;
+        boolean isFading = false;
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (!isSwiping) {
+                isScrolled = true;
+                isXDirection = Math.abs(distanceX) > Math.abs(distanceY);
+            } else if (!isFading) {
+                float ratio = swipeView.getTranslationX() / layoutWidth;
+
+                float oldTranslation = swipeView.getTranslationX();
+                swipeView.setTranslationX(oldTranslation - distanceX);
+                swipeView.setRotation(swipeView.getTranslationX() / layoutWidth * 90);
+
+                final float START_ALPHA = (float) 0.15;
+                final float FINISH_ALPHA = (float) 0.3;
+
+                if (ratio < -START_ALPHA) {
+                    cancelView.setAlpha((-ratio - START_ALPHA) / (FINISH_ALPHA - START_ALPHA));
+                } else {
+                    cancelView.setAlpha(0);
+                }
+
+                if (ratio < -FINISH_ALPHA) {
+                    ObjectAnimator animator0 = ObjectAnimator
+                            .ofFloat(swipeView, "rotation",
+                                    swipeView.getRotation(), -90)
+                            .setDuration(600);
+
+                    ObjectAnimator animator1 = ObjectAnimator
+                            .ofFloat(swipeView, "translationX",
+                                    swipeView.getTranslationX(), -layoutWidth)
+                            .setDuration(600);
+
+                    ObjectAnimator animator2 = ObjectAnimator
+                            .ofFloat(cancelView, "alpha", 1, 0)
+                            .setDuration(600);
+
+                    ObjectAnimator animator3 = ObjectAnimator
+                            .ofFloat(cancelView, "scaleX", (float) 1.0, (float) 1.5)
+                            .setDuration(600);
+
+                    ObjectAnimator animator4 = ObjectAnimator
+                            .ofFloat(cancelView, "scaleY", (float) 1.0, (float) 1.5)
+                            .setDuration(600);
+
+                    AnimatorSet animatorSet = new AnimatorSet();
+                    animatorSet.playTogether(animator0, animator1, animator2, animator3, animator4);
+                    animatorSet.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            viewReset();
+                            if (onSwipedListener != null) {
+                                onSwipedListener.OnSwiped(SwipeToDismissFrameLayout.this);
+                            }
+                        }
+                    });
+                    animatorSet.start();
+
+                    isFading = true;
+                }
+            }
+            return true;
+        }
+
+        private void beginSwiping() {
+            isSwiping = true;
+        }
     }
 }

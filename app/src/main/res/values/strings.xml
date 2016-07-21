@@ -1,4 +1,106 @@
 <resources>
-    <string name="app_name">Yamblz</string>
+    <string name="app_name">Вірші</string>
+    <string name="cancel">Cancel</string>
     <string name="content">Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio, cumque nihil impedit, quo minus id, quod maxime placeat, facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</string>
+    <string name="poem_0">Як умру, то поховайте\n
+Мене на могилі,\n
+Серед степу широкого,\n
+На Вкраїні милій,\n
+Щоб лани широкополі,\n
+І Дніпро, і кручі\n
+Було видно, було чути,\n
+Як реве ревучий.\n
+Як понесе з України\n
+У синєє море\n
+Кров ворожу… отойді я\n
+І лани, і гори —\n
+Все покину і полину\n
+До самого бога\n
+Молитися… а до того\n
+Я не знаю бога.\n
+Поховайте та вставайте,\n
+Кайдани порвіте\n
+І вражою злою кров\'ю\n
+Волю окропіте.\n
+І мене в сем\'ї великій,\n
+В сем\'ї вольній, новій,\n
+Не забудьте пом\'янути\n
+Незлим тихим словом.</string>
+
+    <string name="poem_1">Мені однаково, чи буду\n
+Я жить в Україні, чи ні.\n
+Чи хто згадає, чи забуде\n
+Мене в снігу на чужині –\n
+Однаковісінько мені.\n
+В неволі виріс меж чужими,\n
+І, не оплаканий своїми,\n
+В неволі, плачучи, умру,\n
+І все з собою заберу,\n
+Малого сліду не покину\n
+На нашій славній Україні,\n
+На нашій – не своїй землі.\n
+І не пом\'яне батько з сином,\n
+Не скаже синові: “Молись,\n
+Молися, сину: за Вкраїну\n
+Його замучили колись”.\n
+Мені однаково, чи буде\n
+Той син молитися, чи ні…\n
+Та не однаково мені,\n
+Як Україну злії люде\n
+Присплять, лукаві, і в огні\n
+Її, окраденую, збудять…\n
+Ох, не однаково мені.</string>
+
+    <string name="poem_2">Мені тринадцятий минало.\n
+Я пас ягнята за селом.\n
+Чи то так сонечко сіяло,\n
+Чи так мені чого було?\n
+Мені так любо, любо стало,\n
+Неначе в бога …\n
+Уже прокликали до паю,\n
+А я собі у бур\'яні\n
+Молюся богу… І не знаю,\n
+Чого маленькому мені\n
+Тойді так приязно молилось,\n
+Чого так весело було?\n
+Господнє небо, і село,\n
+Ягня, здається, веселилось!\n
+І сонце гріло, не пекло!\n
+Та недовго сонце гріло,\n
+Недовго молилось…\n
+Запекло, почервоніло\n
+І рай запалило.\n
+Мов прокинувся, дивлюся:\n
+Село почорніло,\n
+Боже небо голубеє\n
+І те помарніло.\n
+Поглянув я на ягнята!\n
+Не мої ягнята!\n
+Обернувся я на хати —\n
+Нема в мене хати!\n
+Не дав мені бог нічого!..\n
+І хлинули сльози,\n
+Тяжкі сльози!.. А дівчина\n
+При самій дорозі\n
+Недалеко коло мене\n
+Плоскінь вибирала,\n
+Та й почула, що я плачу.\n
+Прийшла, привітала,\n
+Утирала мої сльози\n
+І поцілувала…\n
+\n
+Неначе сонце засіяло,\n
+Неначе все на світі стало\n
+Моє… лани, гаї, сади!..\n
+І ми, жартуючи, погнали\n
+Чужі ягнята до води.\n
+\n
+Бридня!.. а й досі, як згадаю,\n
+То серце плаче та болить,\n
+Чому господь не дав дожить\n
+Малого віку у тім раю.\n
+Умер би, орючи на ниві,\n
+Нічого б на світі не знав.\n
+Не був би в світі юродивим,\n
+Людей і бога не прокляв!</string>
 </resources>
