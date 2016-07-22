@@ -53,7 +53,8 @@ public class ContentFragment extends BaseFragment {
         desc = ((TextView) view.findViewById(R.id.txtDesc));
         newCard();
 
-        desc.setMovementMethod(new ScrollingMovementMethod());
+//        desc.setMovementMethod(new ScrollingMovementMethod());
+        desc.setOnTouchListener(new MyGestureListener());
         mDetector = new GestureDetectorCompat(getActivity(), new MyGestureListener());
 
         cardView = (CardView) view.findViewById(R.id.card_view);
@@ -82,6 +83,7 @@ public class ContentFragment extends BaseFragment {
     private class MyGestureListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
         private float direction = 0;
         private float fullWidth = 0;
+        private float height = 0;
 
         @Override
         public boolean onDown(MotionEvent event) {
@@ -96,6 +98,7 @@ public class ContentFragment extends BaseFragment {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             direction += (int) distanceX;
+            height += distanceY;
             if (Math.abs(distanceX) > Math.abs(distanceY)) {
                 float rot = direction / fullWidth * -50;
                 float shift = (direction * 0.9f);
@@ -127,7 +130,8 @@ public class ContentFragment extends BaseFragment {
 
                 }
             } else {
-                desc.computeScroll();
+//                desc.computeScroll();
+                desc.scrollTo(0, Math.max((int)height, 0));
             }
             return true;
         }
