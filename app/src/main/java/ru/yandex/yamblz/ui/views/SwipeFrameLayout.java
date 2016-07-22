@@ -23,7 +23,7 @@ public class SwipeFrameLayout extends FrameLayout
     private View deleteView;
     private GestureDetector gestureDetector;
 
-    private float rotationLeft;
+    private float rotation;
     private float translationX;
     private float scale = 1.0f;
 
@@ -44,12 +44,6 @@ public class SwipeFrameLayout extends FrameLayout
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev)
-    {
-        return super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
         if (deleteView == null) throw new IllegalStateException("SwipeView should contain delete view child");
@@ -61,7 +55,7 @@ public class SwipeFrameLayout extends FrameLayout
             ObjectAnimator scaleYAnim;
 
             rotationAnim = ObjectAnimator
-                    .ofFloat(childView, "rotation", rotationLeft, 0)
+                    .ofFloat(childView, "rotation", rotation, 0)
                     .setDuration(ANIM_DURATION);
             rotationAnim.setInterpolator(accelerateInterpolator);
 
@@ -84,7 +78,7 @@ public class SwipeFrameLayout extends FrameLayout
             animSet.play(rotationAnim).with(translationXAnim).with(scaleXAnim).with(scaleYAnim);
             animSet.start();
 
-            rotationLeft = 0;
+            rotation = 0;
             translationX = 0;
             scale = 0;
 
@@ -111,11 +105,11 @@ public class SwipeFrameLayout extends FrameLayout
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
         {
             translationX = e2.getRawX() - e1.getRawX();
-            rotationLeft = translationX / 40;
+            rotation = translationX / 40;
             scale = Math.abs(translationX / 150);
 
             childView.setTranslationX(translationX);
-            childView.setRotation(rotationLeft);
+            childView.setRotation(rotation);
 
             deleteView.setScaleX(scale);
             deleteView.setScaleY(scale);
