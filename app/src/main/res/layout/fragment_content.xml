@@ -3,12 +3,19 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
-        android:gravity="center"
-        />
+
+    <ImageView
+        android:id="@+id/delete_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/circle"/>
+
+    <include
+        android:id="@+id/card_view"
+        layout="@layout/view_message_card"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"/>
 
 </FrameLayout>
