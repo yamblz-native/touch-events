@@ -1,4 +1,26 @@
 <resources>
     <string name="app_name">Yamblz</string>
     <string name="content">Hello</string>
+    <string name="cap">Capitan America</string>
+    <string name="iron_man">Iron-Man</string>
+    <string name="thor">Thor</string>
+    <string name="black_widow">Black Widow</string>
+    <string name="iron_man_desc">A self-described genius, billionaire, playboy, and philanthropist with an electromechanical suit of armor of his own invention.
+         Downey said that he initially pushed Whedon to make Stark the lead: "In Iron Man, which was an origin story, he was his own epiphany and redemption of sorts. Iron Man 2 is all about not being an island, dealing with legacy issues and making space for others…
+        In The Avengers, he's throwing it down with the others". </string>
+    <string name="cap_desc">
+        A World War II veteran who was enhanced to the peak of human physicality by an experimental serum and frozen in suspended animation before waking up in the modern world.
+        Evans was cast as part of a deal to star in three Marvel films, in addition to The Avengers. Evans said that Steve Rogers is much darker in The Avengers: "It's just about him trying to come to terms with the modern world.
+        You've got to imagine, it's enough of a shock to accept the fact that you're in a completely different time, but everybody you know is dead. Everybody you cared about…
+        He was a soldier, obviously, everybody he went to battle with, all of his brothers in arms, they're all dead. He's just lonely. I think in the beginning it's a fish-out-of-water scene, and it's tough. It's a tough pill for him to swallow. Then comes trying to find a balance with the modern world."
+        Regarding the dynamic between Rogers and Tony Stark, Evans said, "I think there's certainly a dichotomy-this kind of friction between myself and Tony Stark, they're polar opposites.
+        One guy is flash and spotlight and smooth, and the other guy is selfless and in the shadows and kind of quiet and they have to get along. They explore that, and it's pretty fun."
+    </string>
+    <string name="thor_desc">The crown prince of Asgard, based on the Norse mythological deity of the same name. Hemsworth was cast as part of a multiple movie deal.
+        He had previously worked with Joss Whedon on The Cabin in the Woods. Hemsworth said that he was able to maintain the strength he built up for Thor by increasing his food intake, consisting of chicken breasts, fish, steak, and eggs every day.
+        When asked exactly how much, Hemsworth said, "My body weight in protein pretty much!" </string>
+    <string name="black_widow_desc">A highly trained spy working for S.H.I.E.L.D. About the character and her relationship with Hawkeye, Johansson said, "Our characters have a long history. They've fought together for a long time in a lot of battles in many different countries.
+        We're the two members of this avenging group who are skilled warriors – we have no superpowers. Black Widow is definitely one of the team, though. She's not in the cast simply to be a romantic foil or eye candy. She's there to fight, so I never felt like I was the only girl.
+        We all have our various skills and it feels equal". Regarding her training, Johansson said, "Even though Iron Man 2 was 'one-for-them,' I'd never done anything like that before. I'd never been physically driven in something, or a part of something so big.
+        For The Avengers, I've spent so many months training with our stunt team, and fighting all the other actors, it's crazy. I do nothing but fight—all the time."</string>
 </resources>
