@@ -60,7 +60,6 @@ public class ContentFragment extends BaseFragment {
         delete = (ImageView) view.findViewById(R.id.delete);
         cardView.setOnTouchListener(new MyGestureListener());
 //        delete.setVisibility(View.INVISIBLE);
-
         return view;
     }
 
@@ -76,14 +75,13 @@ public class ContentFragment extends BaseFragment {
         img.setImageDrawable(dr);
         name.setText(names[cnt]);
         desc.setText(descs[cnt]);
+        desc.scrollTo(0,0);
 
     }
 
-
-    class MyGestureListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
         private float direction = 0;
         private float fullWidth = 0;
-        private boolean flag = false;
 
         @Override
         public boolean onDown(MotionEvent event) {
@@ -91,6 +89,7 @@ public class ContentFragment extends BaseFragment {
             Point size = new Point();
             display.getSize(size);
             fullWidth = size.x;
+            direction = 0;
             return true;
         }
 
@@ -111,10 +110,10 @@ public class ContentFragment extends BaseFragment {
                     animatorSet.start();
                 }
 //                flag = false;
-                if (direction > fullWidth / 2) {
+                if (direction > fullWidth / 3) {
 //                    flag = true;
                     ObjectAnimator anim1 = ObjectAnimator.ofFloat(cardView, "rotation", 90).setDuration(500);
-                    ObjectAnimator anim2 = ObjectAnimator.ofFloat(cardView, "translationX", fullWidth).setDuration(500);
+                    ObjectAnimator anim2 = ObjectAnimator.ofFloat(cardView, "translationX", -fullWidth).setDuration(500);
                     AnimatorSet animatorSet = new AnimatorSet();
                     animatorSet.playTogether(anim1, anim2);
                     animatorSet.start();
@@ -136,7 +135,12 @@ public class ContentFragment extends BaseFragment {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                cardView.animate().rotation(0).translationX(0).setDuration(500);
+//                cardView.animate().rotation(0).translationX(0).setDuration(500);
+                ObjectAnimator anim1 = ObjectAnimator.ofFloat(cardView, "rotation", 0).setDuration(500);
+                ObjectAnimator anim2 = ObjectAnimator.ofFloat(cardView, "translationX", 0).setDuration(500);
+                AnimatorSet animatorSet = new AnimatorSet();
+                animatorSet.playTogether(anim1, anim2);
+                animatorSet.start();
                 direction = 0;
                 return true;
             }
