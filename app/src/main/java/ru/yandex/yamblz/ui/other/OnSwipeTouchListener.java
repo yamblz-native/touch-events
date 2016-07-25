@@ -94,7 +94,6 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             Timber.d("Action was SCROLL");
             final float diffX = e2.getX() - e1.getX();
-            final float alpha = Math.abs(diffX + viewInitialX) / (viewWidth / 5f);
 
             view.animate()
                     .rotationBy(diffX / 50f)
