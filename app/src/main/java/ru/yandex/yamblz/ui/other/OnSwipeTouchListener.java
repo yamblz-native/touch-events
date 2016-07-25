@@ -24,7 +24,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
     private float viewInitialY;
     private float delButtonInitialX;
     private float delButtonInitialY;
-    private float viewWidth;
+    private float viewWidth = 0;
 
     /**
      * Constructor
@@ -78,11 +78,15 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
         @Override
         public boolean onDown(MotionEvent e) {
             Timber.d("Action was DOWN");
-            viewInitialX = view.getX();
-            viewInitialY = view.getY();
-            delButtonInitialX = delButton.getX();
-            delButtonInitialY = delButton.getY();
-            viewWidth = view.getWidth();
+
+            if (viewWidth == 0) {
+                viewInitialX = view.getX();
+                viewInitialY = view.getY();
+                delButtonInitialX = delButton.getX();
+                delButtonInitialY = delButton.getY();
+                viewWidth = view.getWidth();
+            }
+
             return true;
         }
 
