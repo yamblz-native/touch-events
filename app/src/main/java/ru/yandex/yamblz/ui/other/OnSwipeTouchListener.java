@@ -105,7 +105,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
             delButton.animate()
                     .translationXBy(diffX / -5f)
                     .setInterpolator(new LinearInterpolator())
-                    .alpha(alpha)
+                    .alphaBy(0.05f)
                     .setDuration(0);
 
             return true;
