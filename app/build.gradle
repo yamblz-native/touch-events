@@ -93,6 +93,8 @@ dependencies {
     compile libraries.supportRecyclerView
     compile libraries.supportCardView
 
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
     compile libraries.butterKnife
     apt libraries.butterKnifeCompiler
 
@@ -101,9 +103,10 @@ dependencies {
     // Developer tools (Developer Settings)
     compile libraries.stetho
     compile libraries.leakCanary
-    compile libraries.tinyDancer
+//    compile libraries.tinyDancer
     compile libraries.lynx
     compile libraries.processPhoenix
+
 
     testCompile libraries.junit
     testCompile libraries.robolectric

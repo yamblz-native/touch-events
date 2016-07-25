@@ -4,7 +4,7 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 
-import com.codemonkeylabs.fpslibrary.TinyDancer;
+//import com.codemonkeylabs.fpslibrary.TinyDancer;
 import com.facebook.stetho.Stetho;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,16 +95,16 @@ public class DeveloperSettingsModelImpl implements DeveloperSettingsModel {
         if (isTinyDancerEnabled() && tinyDancerDisplayed.compareAndSet(false, true)) {
             final DisplayMetrics displayMetrics = application.getResources().getDisplayMetrics();
 
-            TinyDancer.create()
-                    .redFlagPercentage(0.2f)
-                    .yellowFlagPercentage(0.05f)
-                    .startingGravity(TOP | START)
-                    .startingXPosition(displayMetrics.widthPixels / 10)
-                    .startingYPosition(displayMetrics.heightPixels / 4)
-                    .show(application);
+//            TinyDancer.create()
+//                    .redFlagPercentage(0.2f)
+//                    .yellowFlagPercentage(0.05f)
+//                    .startingGravity(TOP | START)
+//                    .startingXPosition(displayMetrics.widthPixels / 10)
+//                    .startingYPosition(displayMetrics.heightPixels / 4)
+//                    .show(application);
         } else if (tinyDancerDisplayed.compareAndSet(true, false)) {
             try {
-                TinyDancer.hide(application);
+//                TinyDancer.hide(application);
             } catch (Exception e) {
                 // In some cases TinyDancer can not be hidden without exception: for example when you start it first time on Android 6.
                 Timber.e(e, "Can not hide TinyDancer");
