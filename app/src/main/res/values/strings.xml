@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Yamblz</string>
-    <string name="content">Hello</string>
+    <string name="content">Welcome to Training for Android developers. Here you\'ll find training classes that describe how to accomplish a specific task with code samples you can re-use in your app. Classes are organized into several groups you can see at the top-level of the left navigation.The first training guides below teach you the essentials for Android app development. If you\'re a new Android app developer, you should complete each of these classes in order.Various online video courses are also available if you\'d prefer an interactive video experience.</string>
+    <string name="delete">Delete</string>
 </resources>
