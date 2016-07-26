@@ -1,14 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <TextView
+    <ru.yandex.yamblz.ui.activities.SuperLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
-        android:gravity="center"
-        />
+        android:background="@color/gray">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/image2"
+            android:background="@drawable/del_pic"
+            android:alpha="1"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/image1"
+            android:scaleX="5"
+            android:scaleY="5"
+            android:background="@drawable/leak_canary_icon"/>
+
+
+
+    </ru.yandex.yamblz.ui.activities.SuperLayout>
 
 </FrameLayout>
