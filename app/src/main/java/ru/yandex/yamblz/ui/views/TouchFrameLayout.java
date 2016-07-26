@@ -22,6 +22,7 @@ public class TouchFrameLayout extends FrameLayout {
     private Scroller scroller;
     private Action action;
     private int maxScroll;
+    private float xBase;
 
     @BindView(R.id.dismissible) View dismissible;
     @BindView(R.id.scrollable) TextView scrollable;
@@ -42,7 +43,12 @@ public class TouchFrameLayout extends FrameLayout {
 
     private void init() {
         maxScroll = scrollable.getLineCount() * scrollable.getLineHeight() - scrollable.getHeight();
+
         scrollable.setScroller(scroller);
+
+        xBase = dismissible.getX();
+
+        dismissible.setPivotY(dismissible.getHeight() / 1.3f);
     }
 
 
@@ -77,8 +83,13 @@ public class TouchFrameLayout extends FrameLayout {
                 }
 
                 case DISMISS: {
-                    dismissible.setX(dismissible.getX() - distanceX);
-                    dismissible.setY(dismissible.getY() - distanceY);
+                    float xNew = dismissible.getX() - distanceX;
+                    dismissible.setX(xNew);
+
+                    float offset = xBase - xNew;
+                    float degrees = -offset / 25;
+                    dismissible.setRotation(degrees);
+
                     break;
                 }
 
