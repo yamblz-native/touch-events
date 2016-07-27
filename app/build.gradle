@@ -105,6 +105,9 @@ dependencies {
     compile libraries.lynx
     compile libraries.processPhoenix
 
+    compile 'com.joanzapata.iconify:android-iconify:2.2.2'
+    compile 'com.joanzapata.iconify:android-iconify-fontawesome:2.2.2'
+
     testCompile libraries.junit
     testCompile libraries.robolectric
     testCompile libraries.assertJ
