@@ -46,10 +46,12 @@ public class TouchFrameLayout extends FrameLayout {
     private Scroller scroller;
     private State state;
     private int maxScroll;
+    private float xBaseRepeat;
     private float xBase;
     private float yBase;
     private float dismissThreshold;
 
+    @BindView(R.id.repeat) View repeat;
     @BindView(R.id.dismissible) View dismissible;
     @BindView(R.id.scrollable) TextView scrollable;
 
@@ -91,6 +93,8 @@ public class TouchFrameLayout extends FrameLayout {
     private void init() {
         maxScroll = scrollable.getLineCount() * scrollable.getLineHeight() - scrollable.getHeight();
         scrollable.setScroller(scroller);
+
+        xBaseRepeat = repeat.getX();
 
         xBase = dismissible.getX();
         yBase = dismissible.getY();
@@ -135,7 +139,12 @@ public class TouchFrameLayout extends FrameLayout {
                 case DISMISS: {
                     float xNew = dismissible.getX() - distanceX;
                     dismissible.setX(xNew);
-                    dismissible.setRotation(getAngle(xBase - xNew));
+
+                    float offset = xBase - xNew;
+                    dismissible.setRotation(getAngle(offset));
+
+                    repeat.setX(getRepeatX(offset));
+                    repeat.setAlpha(getRepeatAlpha(offset));
 
                     break;
                 }
@@ -155,6 +164,7 @@ public class TouchFrameLayout extends FrameLayout {
             switch (state) {
 
                 case DISMISS:
+                case REMOVED:
                     float velocity = Math.abs(velocityX / density);
                     if (velocity > 500) {
                         animateDismiss(velocityX < 0, velocity);
@@ -203,6 +213,8 @@ public class TouchFrameLayout extends FrameLayout {
                     .setInterpolator(bounceInterpolator)
                     .setDuration(1000)
                     .start();
+
+            repeat.animate().alpha(0).start();
         }
 
 
@@ -210,6 +222,7 @@ public class TouchFrameLayout extends FrameLayout {
             dismissible.animate()
                     .x(xBase)
                     .rotation(0)
+                    .setDuration(200)
                     .setInterpolator(overshootInterpolator)
                     .start();
         }
@@ -230,6 +243,8 @@ public class TouchFrameLayout extends FrameLayout {
                     .setInterpolator(interpolator)
                     .setDuration(duration)
                     .start();
+
+            repeat.animate().x(xBaseRepeat).alpha(1).start();
         }
 
 
@@ -245,6 +260,28 @@ public class TouchFrameLayout extends FrameLayout {
 
         private float getAngle(float offset) {
             return -offset / 25;
+        }
+
+
+        private float getRepeatX(float cardOffset) {
+            float offset = Math.abs(cardOffset);
+            float width = repeat.getWidth() / 1.5f;
+            if (offset < width) {
+                return xBaseRepeat + cardOffset;
+            } else {
+                if (cardOffset < 0) {
+                    return Math.min(xBaseRepeat, xBaseRepeat - width + (offset - width) * 0.4f);
+                } else {
+                    return Math.max(xBaseRepeat, xBaseRepeat + width - (offset - width) * 0.4f);
+                }
+            }
+        }
+
+
+        private float getRepeatAlpha(float cardOffset) {
+            float width = repeat.getWidth();
+            float offset = Math.abs(cardOffset) - width / 3;
+            return Math.min(offset / width, 1);
         }
     }
 

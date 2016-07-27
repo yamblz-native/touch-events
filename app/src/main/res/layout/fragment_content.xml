@@ -12,6 +12,7 @@
         android:layout_gravity="center"
         android:clickable="true"
         android:foreground="?android:attr/selectableItemBackground"
+        app:cardBackgroundColor="#ff595c"
         app:cardCornerRadius="50dp"
         app:cardElevation="2dp">
 
@@ -19,7 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/repeat"/>
+            android:text="@string/repeat"
+            android:textColor="@color/white"/>
 
     </android.support.v7.widget.CardView>
 
