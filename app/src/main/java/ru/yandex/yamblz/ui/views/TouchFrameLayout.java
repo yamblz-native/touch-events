@@ -9,6 +9,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
@@ -17,14 +18,17 @@ import android.widget.Scroller;
 import android.widget.TextView;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import ru.yandex.yamblz.R;
 
 import static android.view.MotionEvent.ACTION_UP;
-import static ru.yandex.yamblz.ui.views.TouchFrameLayout.Action.DISMISS;
-import static ru.yandex.yamblz.ui.views.TouchFrameLayout.Action.NONE;
-import static ru.yandex.yamblz.ui.views.TouchFrameLayout.Action.SCROLL;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.DISMISS;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.INIT;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.REMOVED;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.SCROLL;
 
 public class TouchFrameLayout extends FrameLayout {
+    private static BounceInterpolator bounceInterpolator = new BounceInterpolator();
     private static OvershootInterpolator overshootInterpolator = new OvershootInterpolator(2);
     private static AccelerateInterpolator accelerateInterpolator = new AccelerateInterpolator();
     private static DecelerateInterpolator decelerateInterpolator = new DecelerateInterpolator(0.8f);
@@ -40,9 +44,10 @@ public class TouchFrameLayout extends FrameLayout {
     private GestureDetector detector;
     private GestureListener listener;
     private Scroller scroller;
-    private Action action;
+    private State state;
     private int maxScroll;
     private float xBase;
+    private float yBase;
     private float dismissThreshold;
 
     @BindView(R.id.dismissible) View dismissible;
@@ -56,9 +61,18 @@ public class TouchFrameLayout extends FrameLayout {
     }
 
 
+    /**
+     * 'Enables' Repeat-button callback only when the card is removed.
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return state != REMOVED;
+    }
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (action == null) init();
+        if (state == null) init();
 
         if (event.getAction() == ACTION_UP) {
             listener.onUp();
@@ -68,11 +82,18 @@ public class TouchFrameLayout extends FrameLayout {
     }
 
 
+    @OnClick(R.id.repeat)
+    void repeat() {
+        listener.animateReappearance();
+    }
+
+
     private void init() {
         maxScroll = scrollable.getLineCount() * scrollable.getLineHeight() - scrollable.getHeight();
         scrollable.setScroller(scroller);
 
         xBase = dismissible.getX();
+        yBase = dismissible.getY();
         dismissThreshold = dismissible.getWidth() / 2.5f;
         dismissible.setPivotY(dismissible.getHeight() / 1.3f);
     }
@@ -82,7 +103,11 @@ public class TouchFrameLayout extends FrameLayout {
 
         @Override
         public boolean onDown(MotionEvent event) {
-            action = NONE;
+            if (state == REMOVED) {
+                return false;
+            }
+
+            state = INIT;
 
             float x = event.getX();
             float y = event.getY();
@@ -98,12 +123,12 @@ public class TouchFrameLayout extends FrameLayout {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            switch (action) {
+            switch (state) {
 
-                case NONE: {
+                case INIT: {
                     float dx = Math.abs(distanceX);
                     float dy = Math.abs(distanceY);
-                    action = (dx > dy) ? DISMISS : SCROLL;
+                    state = (dx > dy) ? DISMISS : SCROLL;
                     break;
                 }
 
@@ -127,7 +152,7 @@ public class TouchFrameLayout extends FrameLayout {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            switch (action) {
+            switch (state) {
 
                 case DISMISS:
                     float velocity = Math.abs(velocityX / density);
@@ -153,7 +178,7 @@ public class TouchFrameLayout extends FrameLayout {
          * animation started here will be canceled and a faster one will be started.
          */
         public void onUp() {
-            if (action != DISMISS) return;
+            if (state != DISMISS) return;
 
             float offset = xBase - dismissible.getX();
 
@@ -165,12 +190,34 @@ public class TouchFrameLayout extends FrameLayout {
         }
 
 
+        void animateReappearance() {
+            state = INIT;
+
+            dismissible.animate().cancel();
+
+            dismissible.setX(xBase);
+            dismissible.setY(-screenSize / 2);
+            dismissible.setRotation(0);
+            dismissible.animate()
+                    .y(yBase)
+                    .setInterpolator(bounceInterpolator)
+                    .setDuration(1000)
+                    .start();
+        }
+
+
         private void animateReturn() {
-            dismissible.animate().x(xBase).rotation(0).setInterpolator(overshootInterpolator).start();
+            dismissible.animate()
+                    .x(xBase)
+                    .rotation(0)
+                    .setInterpolator(overshootInterpolator)
+                    .start();
         }
 
 
         private void animateDismiss(boolean leftward, float velocity) {
+            state = REMOVED;
+
             Interpolator interpolator = (velocity > 0) ? decelerateInterpolator : accelerateInterpolator;
             float destination = xBase + (dismissible.getWidth() + screenSize * 0.5f) * (leftward ? -1 : 1);
             long duration = Math.max(300, 600 - (long) velocity / 13);
@@ -202,9 +249,10 @@ public class TouchFrameLayout extends FrameLayout {
     }
 
 
-    enum Action {
-        NONE,
+    enum State {
+        INIT,
         DISMISS,
-        SCROLL
+        SCROLL,
+        REMOVED
     }
 }
