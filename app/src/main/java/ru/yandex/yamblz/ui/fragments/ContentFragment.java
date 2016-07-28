@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 
 import ru.yandex.yamblz.R;
@@ -37,11 +38,14 @@ public class ContentFragment extends BaseFragment
 
     @Override
     public void OnSwiped(SwipeToDismissFrameLayout swipeToDismissFrameLayout) {
+        final int DURATION = 600;
+
         View view = swipeToDismissFrameLayout.findViewById(R.id.card_view);
         ((TextView) view.findViewById(R.id.text_view)).setText(poems[(++poemI) % poems.length]);
-        ObjectAnimator
+        ObjectAnimator animator = ObjectAnimator
                 .ofFloat(view, "translationX", swipeToDismissFrameLayout.getWidth(), 0)
-                .setDuration(600)
-                .start();
+                .setDuration(DURATION);
+        animator.setInterpolator(new OvershootInterpolator());
+        animator.start();
     }
 }
