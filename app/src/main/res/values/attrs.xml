@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SwipeToDismissFrameLayout">
+        <attr name="swipe_view_id" format="reference"/>
+        <attr name="cancel_view_id" format="reference"/>
+    </declare-styleable>
+</resources>
