@@ -214,7 +214,8 @@ public class TouchFrameLayout extends FrameLayout {
                     .setDuration(1000)
                     .start();
 
-            repeat.animate().alpha(0).start();
+            repeat.setRotation(0);
+            repeat.animate().alpha(0).rotation(180).start();
         }
 
 
