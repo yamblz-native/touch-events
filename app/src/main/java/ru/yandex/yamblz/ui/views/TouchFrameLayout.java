@@ -22,9 +22,9 @@ import butterknife.OnClick;
 import ru.yandex.yamblz.R;
 
 import static android.view.MotionEvent.ACTION_UP;
-import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.DISMISS;
-import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.INIT;
-import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.REMOVED;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.SWIPE;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.IDLE;
+import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.DISMISSED;
 import static ru.yandex.yamblz.ui.views.TouchFrameLayout.State.SCROLL;
 
 public class TouchFrameLayout extends FrameLayout {
@@ -32,6 +32,7 @@ public class TouchFrameLayout extends FrameLayout {
     private static OvershootInterpolator overshootInterpolator = new OvershootInterpolator(2);
     private static AccelerateInterpolator accelerateInterpolator = new AccelerateInterpolator();
     private static DecelerateInterpolator decelerateInterpolator = new DecelerateInterpolator(0.8f);
+
     private static float density;
     private static float screenSize;
 
@@ -41,19 +42,21 @@ public class TouchFrameLayout extends FrameLayout {
         screenSize = Math.max(metrics.widthPixels, metrics.heightPixels);
     }
 
-    private GestureDetector detector;
     private GestureListener listener;
+    private GestureDetector detector;
     private Scroller scroller;
-    private State state;
-    private int maxScroll;
-    private float xBaseRepeat;
-    private float xBase;
-    private float yBase;
-    private float dismissThreshold;
 
-    @BindView(R.id.repeat) View repeat;
+    private State state;
+
+    // Constant values dependent on the views parameters
+    private float xRenewButton;
+    private float xDismissible;
+    private float yDismissible;
+
+    @BindView(R.id.renew) View renewButton;
     @BindView(R.id.dismissible) View dismissible;
     @BindView(R.id.scrollable) TextView scrollable;
+
 
     public TouchFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -64,11 +67,11 @@ public class TouchFrameLayout extends FrameLayout {
 
 
     /**
-     * 'Enables' Repeat-button callback only when the card is removed.
+     * Enables callback of the renew button only when the card is dismissed
      */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return state != REMOVED;
+        return state != DISMISSED;
     }
 
 
@@ -84,34 +87,39 @@ public class TouchFrameLayout extends FrameLayout {
     }
 
 
-    @OnClick(R.id.repeat)
-    void repeat() {
-        listener.animateReappearance();
+    @OnClick(R.id.renew)
+    void renew() {
+        listener.renewCard();
     }
 
 
     private void init() {
-        maxScroll = scrollable.getLineCount() * scrollable.getLineHeight() - scrollable.getHeight();
-        scrollable.setScroller(scroller);
+        state = IDLE;
 
-        xBaseRepeat = repeat.getX();
+        xRenewButton = renewButton.getX();
+        xDismissible = dismissible.getX();
+        yDismissible = dismissible.getY();
 
-        xBase = dismissible.getX();
-        yBase = dismissible.getY();
-        dismissThreshold = dismissible.getWidth() / 2.5f;
         dismissible.setPivotY(dismissible.getHeight() / 1.3f);
+        scrollable.setScroller(scroller);
     }
 
 
     private class GestureListener extends SimpleOnGestureListener {
 
+        /**
+         * Resets state (because of a new tap).
+         *
+         * @return true if a user hit the card, thus subscribing
+         * to the following touch events, false otherwise.
+         */
         @Override
         public boolean onDown(MotionEvent event) {
-            if (state == REMOVED) {
+            if (state == DISMISSED) {
                 return false;
             }
 
-            state = INIT;
+            state = IDLE;
 
             float x = event.getX();
             float y = event.getY();
@@ -129,28 +137,28 @@ public class TouchFrameLayout extends FrameLayout {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             switch (state) {
 
-                case INIT: {
+                case IDLE: {
                     float dx = Math.abs(distanceX);
                     float dy = Math.abs(distanceY);
-                    state = (dx > dy) ? DISMISS : SCROLL;
+                    state = (dx > dy) ? SWIPE : SCROLL;
                     break;
                 }
 
-                case DISMISS: {
+                case SWIPE: {
                     float xNew = dismissible.getX() - distanceX;
                     dismissible.setX(xNew);
 
-                    float offset = xBase - xNew;
-                    dismissible.setRotation(getAngle(offset));
+                    float offset = xDismissible - xNew;
+                    dismissible.setRotation(getDismissibleAngle(offset));
 
-                    repeat.setX(getRepeatX(offset));
-                    repeat.setAlpha(getRepeatAlpha(offset));
+                    renewButton.setX(getRenewButtonX(offset));
+                    renewButton.setAlpha(getRenewButtonAlpha(offset));
 
                     break;
                 }
 
                 case SCROLL: {
-                    scrollable.scrollBy(0, getDy((int) distanceY));
+                    scrollable.scrollBy(0, getScrollableDy((int) distanceY));
                     break;
                 }
             }
@@ -163,16 +171,16 @@ public class TouchFrameLayout extends FrameLayout {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             switch (state) {
 
-                case DISMISS:
-                case REMOVED:
+                case SWIPE:
+                case DISMISSED:
                     float velocity = Math.abs(velocityX / density);
                     if (velocity > 500) {
-                        animateDismiss(velocityX < 0, velocity);
+                        dismissCard(velocityX < 0, velocity);
                     }
                     break;
 
                 case SCROLL:
-                    int dy = getDy((int) -velocityY / 7);
+                    int dy = getScrollableDy((int) -velocityY / 7);
                     scroller.startScroll(0, scrollable.getScrollY(), 0, dy, 300);
                     scrollable.invalidate();
                     break;
@@ -183,45 +191,46 @@ public class TouchFrameLayout extends FrameLayout {
 
 
         /**
-         * Starts 'dismiss' or 'return' animation of the view.
+         * Starts 'dismiss' or 'return' animation of the card.
          * Note that if there is enough velocity in onFling() callback,
          * animation started here will be canceled and a faster one will be started.
          */
-        public void onUp() {
-            if (state != DISMISS) return;
+        void onUp() {
+            if (state != SWIPE) return;
 
-            float offset = xBase - dismissible.getX();
+            float offset = xDismissible - dismissible.getX();
+            float dismissThreshold = dismissible.getWidth() / 2.5f;
 
             if (Math.abs(offset) < dismissThreshold) {
-                animateReturn();
+                returnCard();
             } else {
-                animateDismiss(offset > 0, 0);
+                dismissCard(offset > 0, 0);
             }
         }
 
 
-        void animateReappearance() {
-            state = INIT;
+        void renewCard() {
+            state = IDLE;
 
             dismissible.animate().cancel();
 
-            dismissible.setX(xBase);
+            dismissible.setX(xDismissible);
             dismissible.setY(-screenSize / 2);
             dismissible.setRotation(0);
             dismissible.animate()
-                    .y(yBase)
+                    .y(yDismissible)
                     .setInterpolator(bounceInterpolator)
                     .setDuration(1000)
                     .start();
 
-            repeat.setRotation(0);
-            repeat.animate().alpha(0).rotation(180).start();
+            renewButton.setRotation(0);
+            renewButton.animate().alpha(0).rotation(180).start();
         }
 
 
-        private void animateReturn() {
+        private void returnCard() {
             dismissible.animate()
-                    .x(xBase)
+                    .x(xDismissible)
                     .rotation(0)
                     .setDuration(200)
                     .setInterpolator(overshootInterpolator)
@@ -229,68 +238,74 @@ public class TouchFrameLayout extends FrameLayout {
         }
 
 
-        private void animateDismiss(boolean leftward, float velocity) {
-            state = REMOVED;
+        private void dismissCard(boolean leftward, float velocity) {
+            state = DISMISSED;
 
             Interpolator interpolator = (velocity > 0) ? decelerateInterpolator : accelerateInterpolator;
-            float destination = xBase + (dismissible.getWidth() + screenSize * 0.5f) * (leftward ? -1 : 1);
+            float destination = xDismissible + (dismissible.getWidth() + screenSize * 0.5f) * (leftward ? -1 : 1);
             long duration = Math.max(300, 600 - (long) velocity / 13);
 
             dismissible.animate().cancel();
 
             dismissible.animate()
                     .x(destination)
-                    .rotation(getAngle(xBase - destination))
+                    .rotation(getDismissibleAngle(xDismissible - destination))
                     .setInterpolator(interpolator)
                     .setDuration(duration)
                     .start();
 
-            repeat.animate().x(xBaseRepeat).alpha(1).start();
+            renewButton.animate().x(xRenewButton).alpha(1).start();
         }
 
 
-        private int getDy(int distance) {
+        /**
+         * Prevents upward scrolling when the top is already reached.
+         * Similarly for the bottom.
+         */
+        private int getScrollableDy(int distance) {
             int scroll = scrollable.getScrollY();
             if (distance < 0) {
                 return (scroll + distance < 0) ? -scroll : distance;
             } else {
+                int maxScroll = scrollable.getLineCount() * scrollable.getLineHeight() - scrollable.getHeight();
                 return (scroll + distance > maxScroll) ? maxScroll - scroll : distance;
             }
         }
 
 
-        private float getAngle(float offset) {
+        private float getDismissibleAngle(float offset) {
             return -offset / 25;
         }
 
 
-        private float getRepeatX(float cardOffset) {
+        private float getRenewButtonX(float cardOffset) {
             float offset = Math.abs(cardOffset);
-            float width = repeat.getWidth() / 1.5f;
+            float width = renewButton.getWidth() / 1.5f;
             if (offset < width) {
-                return xBaseRepeat + cardOffset;
+                return xRenewButton + cardOffset;
             } else {
+                float delta = (offset - width) * 0.4f;
                 if (cardOffset < 0) {
-                    return Math.min(xBaseRepeat, xBaseRepeat - width + (offset - width) * 0.4f);
+                    return Math.min(xRenewButton, xRenewButton - width + delta);
                 } else {
-                    return Math.max(xBaseRepeat, xBaseRepeat + width - (offset - width) * 0.4f);
+                    return Math.max(xRenewButton, xRenewButton + width - delta);
                 }
             }
         }
 
 
-        private float getRepeatAlpha(float cardOffset) {
-            float width = repeat.getWidth();
-            float offset = Math.abs(cardOffset) - width / 3;
+        private float getRenewButtonAlpha(float cardOffset) {
+            float width = renewButton.getWidth();
+            float offset = Math.abs(cardOffset) - (width / 3);
             return Math.min(offset / width, 1);
         }
     }
 
 
     enum State {
-        INIT,
-        DISMISS,
+        IDLE,
+        SWIPE,
         SCROLL,
-        REMOVED
+        DISMISSED
     }
 }
