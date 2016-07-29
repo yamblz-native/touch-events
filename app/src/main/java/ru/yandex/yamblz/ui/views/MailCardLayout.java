@@ -5,8 +5,10 @@ import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Scroller;
 import android.widget.TextView;
 
@@ -21,6 +23,8 @@ public class MailCardLayout extends FrameLayout {
     private Scroller scroller;
     private float cardStartPositionX;
     private float cardStartPositionY;
+    private float deleteIconStartPositionX;
+    private float inboxIconStartPositionX;
 
     @BindView(R.id.email_card)
     CardView emailCardView;
@@ -28,6 +32,10 @@ public class MailCardLayout extends FrameLayout {
     TextView emailTextView;
     @BindView(R.id.newCard)
     Button newCard;
+    @BindView(R.id.email_icon_delete)
+    ImageView deleteIcon;
+    @BindView(R.id.email_icon_inbox)
+    ImageView inboxIcon;
 
     public MailCardLayout(Context context) {
         this(context, null, 0);
@@ -50,6 +58,8 @@ public class MailCardLayout extends FrameLayout {
         emailCardView.setPivotY(emailCardView.getHeight());
         cardStartPositionX = emailCardView.getX();
         cardStartPositionY = emailCardView.getY();
+        deleteIconStartPositionX = deleteIcon.getX();
+        inboxIconStartPositionX = inboxIcon.getX();
     }
 
     @Override
@@ -59,11 +69,7 @@ public class MailCardLayout extends FrameLayout {
                 //Return card to startPosition if scrolling was short
                 float offset = cardStartPositionX - emailCardView.getX();
                 if (Math.abs(offset) < emailCardView.getWidth() / 2.3f) {
-                    emailCardView.animate().cancel();
-                    emailCardView.animate()
-                            .x(cardStartPositionX)
-                            .rotation(0)
-                            .start();
+                    returnStartLocation();
                 } else {
                     swipeEmailCardView(-offset, true);
                 }
@@ -71,13 +77,21 @@ public class MailCardLayout extends FrameLayout {
         return gestureDetector.onTouchEvent(event);
     }
 
-
     @OnClick(R.id.newCard)
-    void renew() {
+    void returnStartLocation() {
+        emailCardView.animate().cancel();
         emailCardView.animate()
-                .y(cardStartPositionY)
                 .x(cardStartPositionX)
+                .y(cardStartPositionY)
                 .rotation(0)
+                .start();
+        deleteIcon.animate()
+                .x(deleteIconStartPositionX)
+                .alpha(0)
+                .start();
+        inboxIcon.animate()
+                .x(inboxIconStartPositionX)
+                .alpha(0)
                 .start();
     }
 
@@ -89,6 +103,8 @@ public class MailCardLayout extends FrameLayout {
      * @param mode  false for Scrolling or true for Flinging
      */
     private void swipeEmailCardView(float value, boolean mode) {
+        boolean chooseViewCondition = emailCardView.getRotation() < 0;
+        View iconView = chooseViewCondition ? inboxIcon : deleteIcon;
         if (mode) {
             float destination = cardStartPositionX + (value > 0 ? 1 : -1) * 2 * emailCardView.getWidth();
             emailCardView.animate().cancel();
@@ -97,13 +113,44 @@ public class MailCardLayout extends FrameLayout {
                     .setDuration(200)
                     .rotation(value / 600)
                     .start();
+
+            iconView.animate().cancel();
+            iconView.animate()
+                    .x(cardStartPositionX + emailCardView.getMeasuredWidth() / 2 - iconView.getMeasuredWidth() / 2)
+                    .setDuration(200)
+                    .alpha(1)
+                    .start();
+
         } else {
-            float startX = emailCardView.getX();
             //0,9f for view point maximum stay under finger position
-            float xNew = startX - 0.9f * value;
-            float offset = startX - xNew;
-            emailCardView.setX(xNew);
+            float offset = 0.9f * value;
+            emailCardView.setX(emailCardView.getX() - offset);
             emailCardView.setRotation(emailCardView.getRotation() - offset / 13);
+
+            if (emailCardView.getRotation() == 0) {
+                deleteIcon.setX(deleteIconStartPositionX);
+                inboxIcon.setX(inboxIconStartPositionX);
+            }
+
+            if (Math.abs(emailCardView.getRotation()) < 10) {
+                iconView.setX(iconView.getX() + value);
+                if (chooseViewCondition) {
+                    if (value < 0) {
+                        iconView.setAlpha(iconView.getAlpha() - Math.abs(value) / 140);
+                    } else {
+                        iconView.setAlpha(iconView.getAlpha() + Math.abs(value) / 140);
+                    }
+                }
+                if (!chooseViewCondition) {
+                    if (value > 0) {
+                        iconView.setAlpha(iconView.getAlpha() - Math.abs(value) / 140);
+                    } else {
+                        iconView.setAlpha(iconView.getAlpha() + Math.abs(value) / 140);
+                    }
+                }
+            } else {
+                iconView.setX(iconView.getX() - value);
+            }
         }
     }
 
@@ -134,7 +181,6 @@ public class MailCardLayout extends FrameLayout {
             emailTextView.scrollBy(0, dy);
         }
     }
-
 
     private class MainCardLayoutGestureListener extends GestureDetector.SimpleOnGestureListener {
         /**

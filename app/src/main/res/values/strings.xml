@@ -10,4 +10,5 @@
     <string name="remove">Remove</string>
     <string name="author_photo">Photo</string>
     <string name="big_remove_icon">Big remove icon</string>
+    <string name="big_inbox_icon">Big inbox icon</string>
 </resources>
