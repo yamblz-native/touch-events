@@ -3,24 +3,31 @@ package ru.yandex.yamblz.ui.views;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Scroller;
 import android.widget.TextView;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import ru.yandex.yamblz.R;
+
+import static android.view.MotionEvent.ACTION_UP;
 
 public class MailCardLayout extends FrameLayout {
     private GestureDetector gestureDetector;
     private Scroller scroller;
+    private float cardStartPositionX;
+    private float cardStartPositionY;
 
     @BindView(R.id.email_card)
     CardView emailCardView;
     @BindView(R.id.email_text)
     TextView emailTextView;
+    @BindView(R.id.newCard)
+    Button newCard;
 
     public MailCardLayout(Context context) {
         this(context, null, 0);
@@ -40,13 +47,65 @@ public class MailCardLayout extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         emailTextView.setScroller(scroller);
+        emailCardView.setPivotY(emailCardView.getHeight());
+        cardStartPositionX = emailCardView.getX();
+        cardStartPositionY = emailCardView.getY();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case ACTION_UP:
+                //Return card to startPosition if scrolling was short
+                float offset = cardStartPositionX - emailCardView.getX();
+                if (Math.abs(offset) < emailCardView.getWidth() / 2.3f) {
+                    emailCardView.animate().cancel();
+                    emailCardView.animate()
+                            .x(cardStartPositionX)
+                            .rotation(0)
+                            .start();
+                } else {
+                    swipeEmailCardView(-offset, true);
+                }
+        }
         return gestureDetector.onTouchEvent(event);
     }
 
+
+    @OnClick(R.id.newCard)
+    void renew() {
+        emailCardView.animate()
+                .y(cardStartPositionY)
+                .x(cardStartPositionX)
+                .rotation(0)
+                .start();
+    }
+
+    /**
+     * <p>Swipe and animate emailCardView</p>
+     * <p>
+     *
+     * @param value Distance for Scrolling or Velocity in Flinging mode
+     * @param mode  false for Scrolling or true for Flinging
+     */
+    private void swipeEmailCardView(float value, boolean mode) {
+        if (mode) {
+            float destination = cardStartPositionX + (value > 0 ? 1 : -1) * 2 * emailCardView.getWidth();
+            emailCardView.animate().cancel();
+            emailCardView.animate()
+                    .x(destination)
+                    .setDuration(200)
+                    .rotation(value / 600)
+                    .start();
+        } else {
+            float startX = emailCardView.getX();
+            //0,9f for view point maximum stay under finger position
+            float xNew = startX - 0.9f * value;
+            float offset = startX - xNew;
+            emailCardView.setX(xNew);
+            emailCardView.setRotation(emailCardView.getRotation() - offset / 13);
+        }
+    }
 
     /**
      * <p>Scroll and animate emailTextView</p>
@@ -58,7 +117,7 @@ public class MailCardLayout extends FrameLayout {
      */
     private void scrollEmailTextView(float value, boolean mode) {
         int startY = emailTextView.getScrollY();
-        int dy = mode ? Math.round(-value / 13) : Math.round(value);
+        int dy = mode ? Math.round(-value / 6) : Math.round(value);
 
         if (dy < 0) { //Upper scroll, check top bound
             //Check top bound
@@ -78,7 +137,6 @@ public class MailCardLayout extends FrameLayout {
 
 
     private class MainCardLayoutGestureListener extends GestureDetector.SimpleOnGestureListener {
-        final static String TAG = "GestureDetector";
         /**
          * <p>Constants for check that gesture is dismissing view or scrolling text.</p>
          * Because wrong gesture is for text scrolling more possible
@@ -116,11 +174,9 @@ public class MailCardLayout extends FrameLayout {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-//            Log.d(TAG, new StringBuilder("onScroll ").append("x=").append(distanceX).append(";y=").append(distanceY).toString());
             if ((scrollModeConstant * Math.abs(distanceX)) > Math.abs(distanceY)) {
-//                animateScrollView();
+                swipeEmailCardView(distanceX, false);
             } else {
-//                animateScrollText();
                 scrollEmailTextView(distanceY, false);
             }
             return true;
@@ -128,9 +184,11 @@ public class MailCardLayout extends FrameLayout {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            Log.d(TAG, new StringBuilder("onFling ").append("x=").append(velocityX).append(";y=").append(velocityY).toString());
             if ((flingModeConstant * Math.abs(velocityX)) > Math.abs(velocityY)) {
-//                animateFlingView();
+                //If velocity is so small,maybe it's not a swipe
+                if (Math.abs(velocityX) > 5000) {
+                    swipeEmailCardView(velocityX, true);
+                }
             } else {
                 scrollEmailTextView(velocityY, true);
             }

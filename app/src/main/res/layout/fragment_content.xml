@@ -101,4 +101,9 @@
         android:contentDescription="@string/big_remove_icon"
         android:visibility="gone" />
 
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/newCard"/>
 </ru.yandex.yamblz.ui.views.MailCardLayout>
