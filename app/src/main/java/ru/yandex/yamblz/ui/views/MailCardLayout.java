@@ -1,24 +1,27 @@
 package ru.yandex.yamblz.ui.views;
 
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Scroller;
 import android.widget.TextView;
 
+import com.squareup.seismic.ShakeDetector;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 import ru.yandex.yamblz.R;
 
+import static android.content.Context.SENSOR_SERVICE;
 import static android.view.MotionEvent.ACTION_UP;
 
-public class MailCardLayout extends FrameLayout {
+public class MailCardLayout extends FrameLayout implements ShakeDetector.Listener{
     private GestureDetector gestureDetector;
     private Scroller scroller;
     private float cardStartPositionX;
@@ -29,7 +32,6 @@ public class MailCardLayout extends FrameLayout {
 
     @BindView(R.id.email_card) CardView emailCardView;
     @BindView(R.id.email_text) TextView emailTextView;
-    @BindView(R.id.newCard) Button newCard;
     @BindView(R.id.email_icon_delete) ImageView deleteIcon;
     @BindView(R.id.email_icon_inbox) ImageView inboxIcon;
     @BindView(R.id.email_icon_check) ImageView checkIcon;
@@ -47,6 +49,9 @@ public class MailCardLayout extends FrameLayout {
         super(context, attrs, defStyleAttr);
         gestureDetector = new GestureDetector(context, new MainCardLayoutGestureListener());
         scroller = new Scroller(context);
+        SensorManager sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+        ShakeDetector sd = new ShakeDetector(this);
+        sd.start(sensorManager);
     }
 
     @Override
@@ -75,10 +80,9 @@ public class MailCardLayout extends FrameLayout {
         return gestureDetector.onTouchEvent(event);
     }
 
-    @OnClick(R.id.newCard)
-    void getNewCard() {
+    private void getNewCard() {
         if (countOfCards > 0) {
-            emailCardView.animate().cancel();
+            emailCardView.animate().setDuration(600).cancel();
             emailCardView.setY(cardStartPositionY - 2000);
             emailCardView.setX(cardStartPositionX);
             countOfCards--;
@@ -107,7 +111,6 @@ public class MailCardLayout extends FrameLayout {
         checkIcon.animate().alpha(0)
                 .start();
     }
-
 
     @OnClick({R.id.mail_move_to_inbox, R.id.mail_remove, R.id.mail_check})
     void onClick(View v) {
@@ -144,7 +147,7 @@ public class MailCardLayout extends FrameLayout {
                 backView.animate().setDuration(300).alpha(1).start();
                 break;
         }
-
+        getNewCard();
     }
 
     /**
@@ -277,5 +280,13 @@ public class MailCardLayout extends FrameLayout {
             }
             return true;
         }
+    }
+
+    @Override
+    public void hearShake() {
+        countOfCards = 5;
+        emailCardView.setAlpha(1);
+        background_error.animate().alpha(0).start();
+        getNewCard();
     }
 }

@@ -147,8 +147,4 @@
         android:text="@string/error_text" />
 
 
-    <Button
-        android:id="@+id/newCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 </ru.yandex.yamblz.ui.views.MailCardLayout>
