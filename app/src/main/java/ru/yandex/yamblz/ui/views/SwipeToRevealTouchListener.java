@@ -17,16 +17,12 @@ import static java.lang.Math.*;
  */
 
 public class SwipeToRevealTouchListener implements View.OnTouchListener {
-    private float xStartPosition;
-    private float yStartPosition;
-    private float xViewPosition;
-    private float yViewPosition;
+    private float xStartPosition, yStartPosition;
     private float startRotation;
     private float x, y;
     private final float angleThreshold = 25;
-    private float maxDistance = 500;
 
-    private float revealAlpha, revealTranslateX, xRevealPosition;
+    private float revealAlpha, xRevealPosition;
 
     private WeakReference<View> revealView;
 
@@ -39,8 +35,6 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
     public void setRevealView(View view) {
         this.revealView = new WeakReference<>(view);
         view.setAlpha(0.0f);
-        maxDistance = revealView.get().getLayoutParams().width;
-
     }
 
     @Override
@@ -52,9 +46,6 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 v.setPivotX(v.getWidth() / 2);
                 v.setPivotY(v.getHeight() * 2);
-
-                xViewPosition = v.getX();
-                yViewPosition = v.getY();
                 startRotation = v.getRotation();
 
                 if (xRevealPosition == 0) {
@@ -63,11 +54,9 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
 
                 xStartPosition = x;
                 yStartPosition = y;
-                Timber.d("Action DOWN: [ " + xStartPosition + "; " + yStartPosition + " ]");
                 break;
             case MotionEvent.ACTION_MOVE:
-                Timber.d("Action MOVE: [ " + x + "; " + y + " ]");
-                Timber.d("Distance moved: [ " + (x - xStartPosition) + " ]");
+                float scroll = y - yStartPosition;
 
                 float distance = x - xStartPosition;
                 if (Math.abs(v.getRotation()) < angleThreshold
@@ -77,14 +66,9 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
                 }
 
                 if (revealView != null && revealView.get() != null) {
-                    Timber.d("Alpha: " + (xViewPosition + distance) / (2 * maxDistance));
                     revealAlpha = abs(v.getRotation() / angleThreshold);
                     revealView.get().setAlpha(revealAlpha);
-                    if (distance > 0) {
-                        revealView.get().setX((float) (xRevealPosition + v.getRotation() * 2 * sin(Math.toRadians(v.getRotation() * 12))));
-                    } else {
-                        revealView.get().setX((float) (xRevealPosition - v.getRotation() * 2 * sin(Math.toRadians(v.getRotation() * 12))));
-                    }
+                    revealView.get().setX((float) (xRevealPosition + v.getRotation() * 3 * cos(Math.toRadians(v.getRotation() * 12))));
 
                 }
                 break;
