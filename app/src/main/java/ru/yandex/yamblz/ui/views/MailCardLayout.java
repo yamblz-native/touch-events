@@ -1,5 +1,7 @@
 package ru.yandex.yamblz.ui.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.support.v7.widget.CardView;
@@ -7,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Scroller;
@@ -21,7 +24,7 @@ import ru.yandex.yamblz.R;
 import static android.content.Context.SENSOR_SERVICE;
 import static android.view.MotionEvent.ACTION_UP;
 
-public class MailCardLayout extends FrameLayout implements ShakeDetector.Listener{
+public class MailCardLayout extends FrameLayout implements ShakeDetector.Listener {
     private GestureDetector gestureDetector;
     private Scroller scroller;
     private float cardStartPositionX;
@@ -69,85 +72,102 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case ACTION_UP:
-                //Return card to startPosition if scrolling was short
                 float offset = cardStartPositionX - emailCardView.getX();
                 if (Math.abs(offset) < emailCardView.getWidth() / 2.3f) {
-                    returnStartLocation();
+                    returnCardStartLocation();
+                    hideAllIcons();
                 } else {
-                    moveEmailCardView(-offset, true);
+                    dismissEmailCardView(-offset, getIconByRotation());
                 }
         }
         return gestureDetector.onTouchEvent(event);
     }
 
+    /**
+     * <p>Show new card or Error background if all cards gone</p>
+     */
     private void getNewCard() {
+        emailCardView.animate().setListener(null).cancel();
+        hideAllIcons();
         if (countOfCards > 0) {
-            emailCardView.animate().setDuration(600).cancel();
+            emailTextView.setScrollY(0);
+            emailCardView.animate().rotation(0).start();
             emailCardView.setY(cardStartPositionY - 2000);
             emailCardView.setX(cardStartPositionX);
             countOfCards--;
-            returnStartLocation();
+            returnCardStartLocation();
         } else {
-            background_error.animate().alpha(1).setDuration(300)
-                    .start();
-            deleteIcon.animate().x(deleteIconStartPositionX).alpha(0)
-                    .start();
-            inboxIcon.animate().x(inboxIconStartPositionX).alpha(0)
-                    .start();
-            checkIcon.animate().alpha(0)
+            background_error.animate().alpha(1).setDuration(1000)
                     .start();
             emailCardView.animate().alpha(0)
                     .start();
         }
     }
 
-    private void returnStartLocation() {
-        emailCardView.animate().x(cardStartPositionX).y(cardStartPositionY).rotation(0)
-                .start();
-        deleteIcon.animate().x(deleteIconStartPositionX).alpha(0)
-                .start();
-        inboxIcon.animate().x(inboxIconStartPositionX).alpha(0)
-                .start();
-        checkIcon.animate().alpha(0)
-                .start();
+    /**
+     * <p>Hide all icons element and return them to the start position</p>
+     */
+    private void hideAllIcons() {
+        deleteIcon.animate().x(deleteIconStartPositionX).alpha(0).start();
+        inboxIcon.animate().x(inboxIconStartPositionX).alpha(0).start();
+        checkIcon.animate().alpha(0).start();
+    }
+
+    /**
+     * <p>Returning start position to all moving element</p>
+     */
+    private void returnCardStartLocation() {
+        emailCardView.animate().x(cardStartPositionX).y(cardStartPositionY).rotation(0).start();
     }
 
     @OnClick({R.id.mail_move_to_inbox, R.id.mail_remove, R.id.mail_check})
     void onClick(View v) {
+        float swipeValue = 6000;
         switch (v.getId()) {
             case R.id.mail_move_to_inbox:
-                swipeEmailCardView(-6000, inboxIcon);
+                dismissEmailCardView(-swipeValue, inboxIcon);
                 break;
             case R.id.mail_remove:
-                swipeEmailCardView(6000, deleteIcon);
+                dismissEmailCardView(swipeValue, deleteIcon);
                 break;
             case R.id.mail_check:
-                swipeEmailCardView(6000, checkIcon);
+                dismissEmailCardView(swipeValue, checkIcon);
                 break;
         }
     }
 
-    private void swipeEmailCardView(float value, View backView) {
+    private View getIconByRotation() {
+        boolean chooseViewCondition = emailCardView.getRotation() < 0;
+        return chooseViewCondition ? inboxIcon : deleteIcon;
+    }
+
+    private void dismissEmailCardView(float value, View iconView) {
+        emailCardView.animate().cancel();
         float destination = cardStartPositionX + (value > 0 ? 1 : -1) * 2 * emailCardView.getWidth();
-        switch (backView.getId()) {
+        ViewPropertyAnimator dismissAnim = emailCardView.animate();
+        switch (iconView.getId()) {
             case R.id.email_icon_delete:
             case R.id.email_icon_inbox:
-                emailCardView.animate().cancel();
-                emailCardView.animate().x(destination).setDuration(600).rotation(value / 600)
-                        .start();
-                backView.animate().cancel();
-                backView.animate()
-                        .x(cardStartPositionX + emailCardView.getMeasuredWidth() / 2 - backView.getMeasuredWidth() / 2)
+                dismissAnim.x(destination).rotation(emailCardView.getRotation() + value / 600)
+                        .setDuration(400);
+                iconView.animate().cancel();
+                iconView.animate()
+                        .x(cardStartPositionX + emailCardView.getMeasuredWidth() / 2 - iconView.getMeasuredWidth() / 2)
                         .setDuration(400).alpha(1)
                         .start();
                 break;
             case R.id.email_icon_check:
-                emailCardView.animate().cancel();
-                emailCardView.animate().y(destination).setDuration(300).start();
-                backView.animate().setDuration(300).alpha(1).start();
+                dismissAnim.y(destination).setDuration(300).start();
+                iconView.animate().setDuration(300).alpha(1).start();
                 break;
         }
-        getNewCard();
+        dismissAnim.setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                getNewCard();
+            }
+        });
+        dismissAnim.start();
     }
 
     /**
@@ -158,40 +178,30 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
      * @param mode  false for Scrolling or true for Flinging
      */
     private void moveEmailCardView(float value, boolean mode) {
-        boolean chooseViewCondition = emailCardView.getRotation() < 0;
-        View iconView = chooseViewCondition ? inboxIcon : deleteIcon;
-        if (mode) {
-            swipeEmailCardView(value, iconView);
+        View iconView = getIconByRotation();
+        float offset = 0.9f * value;
+        emailCardView.setX(emailCardView.getX() - offset);
+        emailCardView.setRotation(emailCardView.getRotation() - offset / 13);
+
+        float dAlpha = Math.abs(value) / 140;
+        if (Math.abs(emailCardView.getRotation()) < 10) {
+            iconView.setX(iconView.getX() + value);
+            if (emailCardView.getRotation() < 0) {
+                if (value < 0) {
+                    iconView.setAlpha(iconView.getAlpha() - dAlpha);
+                } else {
+                    iconView.setAlpha(iconView.getAlpha() + dAlpha);
+                }
+            }
+            if (emailCardView.getRotation() > 0) {
+                if (value > 0) {
+                    iconView.setAlpha(iconView.getAlpha() - dAlpha);
+                } else {
+                    iconView.setAlpha(iconView.getAlpha() + dAlpha);
+                }
+            }
         } else {
-            //0,9f for view point maximum stay under finger position
-            float offset = 0.9f * value;
-            emailCardView.setX(emailCardView.getX() - offset);
-            emailCardView.setRotation(emailCardView.getRotation() - offset / 13);
-
-            if (emailCardView.getRotation() == 0) {
-                deleteIcon.setX(deleteIconStartPositionX);
-                inboxIcon.setX(inboxIconStartPositionX);
-            }
-
-            if (Math.abs(emailCardView.getRotation()) < 10) {
-                iconView.setX(iconView.getX() + value);
-                if (chooseViewCondition) {
-                    if (value < 0) {
-                        iconView.setAlpha(iconView.getAlpha() - Math.abs(value) / 140);
-                    } else {
-                        iconView.setAlpha(iconView.getAlpha() + Math.abs(value) / 140);
-                    }
-                }
-                if (!chooseViewCondition) {
-                    if (value > 0) {
-                        iconView.setAlpha(iconView.getAlpha() - Math.abs(value) / 140);
-                    } else {
-                        iconView.setAlpha(iconView.getAlpha() + Math.abs(value) / 140);
-                    }
-                }
-            } else {
-                iconView.setX(iconView.getX() - value);
-            }
+            iconView.setX(iconView.getX() - value);
         }
     }
 
@@ -233,7 +243,6 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
         final float scrollModeConstant = 0.7f;
         final float flingModeConstant = 0.6f;
 
-
         /**
          * <p>Check that a gesture on the emailcard view</p>
          * At First in Y coordinate because using vertical layout
@@ -273,7 +282,7 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
             if ((flingModeConstant * Math.abs(velocityX)) > Math.abs(velocityY)) {
                 //If velocity is so small,maybe it's not a swipe
                 if (Math.abs(velocityX) > 5000) {
-                    moveEmailCardView(velocityX, true);
+                    dismissEmailCardView(velocityX, getIconByRotation());
                 }
             } else {
                 scrollEmailTextView(velocityY, true);
@@ -282,9 +291,12 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
         }
     }
 
+    /**
+     * <p>For renew email cards in debug</p>
+     */
     @Override
     public void hearShake() {
-        countOfCards = 5;
+        countOfCards += 5;
         emailCardView.setAlpha(1);
         background_error.animate().alpha(0).start();
         getNewCard();
