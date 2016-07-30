@@ -27,20 +27,13 @@ public class MailCardLayout extends FrameLayout {
     private float inboxIconStartPositionX;
     private int countOfCards = 5;
 
-    @BindView(R.id.email_card)
-    CardView emailCardView;
-    @BindView(R.id.email_text)
-    TextView emailTextView;
-    @BindView(R.id.newCard)
-    Button newCard;
-    @BindView(R.id.email_icon_delete)
-    ImageView deleteIcon;
-    @BindView(R.id.email_icon_inbox)
-    ImageView inboxIcon;
-    @BindView(R.id.email_icon_check)
-    ImageView checkIcon;
-    @BindView(R.id.background_error)
-    View background_error;
+    @BindView(R.id.email_card) CardView emailCardView;
+    @BindView(R.id.email_text) TextView emailTextView;
+    @BindView(R.id.newCard) Button newCard;
+    @BindView(R.id.email_icon_delete) ImageView deleteIcon;
+    @BindView(R.id.email_icon_inbox) ImageView inboxIcon;
+    @BindView(R.id.email_icon_check) ImageView checkIcon;
+    @BindView(R.id.background_error) View background_error;
 
     public MailCardLayout(Context context) {
         this(context, null, 0);
@@ -83,40 +76,41 @@ public class MailCardLayout extends FrameLayout {
     }
 
     @OnClick(R.id.newCard)
-    void returnStartLocation() {
+    void getNewCard() {
         if (countOfCards > 0) {
             emailCardView.animate().cancel();
             emailCardView.setY(cardStartPositionY - 2000);
             emailCardView.setX(cardStartPositionX);
-            emailCardView.setRotation(0f);
-            emailCardView.animate()
-                    .x(cardStartPositionX)
-                    .y(cardStartPositionY)
-                    .start();
+            countOfCards--;
+            returnStartLocation();
         } else {
-            background_error.animate()
-                    .alpha(1)
-                    .setDuration(300)
+            background_error.animate().alpha(1).setDuration(300)
+                    .start();
+            deleteIcon.animate().x(deleteIconStartPositionX).alpha(0)
+                    .start();
+            inboxIcon.animate().x(inboxIconStartPositionX).alpha(0)
+                    .start();
+            checkIcon.animate().alpha(0)
+                    .start();
+            emailCardView.animate().alpha(0)
                     .start();
         }
-        deleteIcon.animate()
-                .x(deleteIconStartPositionX)
-                .alpha(0)
-                .start();
-        inboxIcon.animate()
-                .x(inboxIconStartPositionX)
-                .alpha(0)
-                .start();
-        checkIcon.animate()
-                .alpha(0)
-                .start();
+    }
 
-        countOfCards--;
+    private void returnStartLocation() {
+        emailCardView.animate().x(cardStartPositionX).y(cardStartPositionY).rotation(0)
+                .start();
+        deleteIcon.animate().x(deleteIconStartPositionX).alpha(0)
+                .start();
+        inboxIcon.animate().x(inboxIconStartPositionX).alpha(0)
+                .start();
+        checkIcon.animate().alpha(0)
+                .start();
     }
 
 
     @OnClick({R.id.mail_move_to_inbox, R.id.mail_remove, R.id.mail_check})
-    public void onClick(View v) {
+    void onClick(View v) {
         switch (v.getId()) {
             case R.id.mail_move_to_inbox:
                 swipeEmailCardView(-6000, inboxIcon);
@@ -136,28 +130,18 @@ public class MailCardLayout extends FrameLayout {
             case R.id.email_icon_delete:
             case R.id.email_icon_inbox:
                 emailCardView.animate().cancel();
-                emailCardView.animate()
-                        .x(destination)
-                        .setDuration(600)
-                        .rotation(value / 600)
+                emailCardView.animate().x(destination).setDuration(600).rotation(value / 600)
                         .start();
                 backView.animate().cancel();
                 backView.animate()
                         .x(cardStartPositionX + emailCardView.getMeasuredWidth() / 2 - backView.getMeasuredWidth() / 2)
-                        .setDuration(400)
-                        .alpha(1)
+                        .setDuration(400).alpha(1)
                         .start();
                 break;
             case R.id.email_icon_check:
                 emailCardView.animate().cancel();
-                emailCardView.animate()
-                        .y(destination)
-                        .setDuration(300)
-                        .start();
-                backView.animate()
-                        .setDuration(300)
-                        .alpha(1)
-                        .start();
+                emailCardView.animate().y(destination).setDuration(300).start();
+                backView.animate().setDuration(300).alpha(1).start();
                 break;
         }
 

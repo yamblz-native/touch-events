@@ -30,6 +30,8 @@ ext.versions = [
         tinyDancer                   : '0.0.8',
         lynx                         : '1.6',
         processPhoenix               : '1.0.2',
+        seismic                      : '1.0.2',
+
 
         junit                        : '4.12',
         robolectric                  : '3.0',
@@ -74,6 +76,7 @@ ext.libraries = [
         lynx                    : "com.github.pedrovgs:lynx:$versions.lynx",
         devMetricsNoOp          : "com.frogermcs.androiddevmetrics:androiddevmetrics-runtime-noop:$versions.androidDevMetricsGradlePlugin",
         processPhoenix          : "com.jakewharton:process-phoenix:$versions.processPhoenix",
+        seismic                 : "com.squareup:seismic:$versions.seismic",
 
         // Test dependencies
         junit                   : "junit:junit:$versions.junit",
