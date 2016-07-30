@@ -1,14 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<ru.yandex.yamblz.ui.views.MailCardLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/email.card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="48dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="48dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/author_photo"
+            android:src="@drawable/ic_face" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:text="@string/email_author"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/email_theme"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="44dp"
+            android:text="@string/email_time"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/email.text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="56dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="72dp"
+            android:lineSpacingMultiplier="1.5"
+            android:maxHeight="160dp"
+            android:scrollbars="vertical"
+            android:text="@string/email_text"
+            android:textColor="@color/black" />
+
+        <ImageView
+            android:id="@+id/mail_move_to_inbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/move_to_inbox"
+            android:src="@drawable/ic_move_to_inbox" />
+
+        <ImageView
+            android:id="@+id/mail_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/check"
+            android:src="@drawable/ic_check" />
+
+        <ImageView
+            android:id="@+id/mail_remove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/remove"
+            android:src="@drawable/ic_clear_black" />
+
+    </android.support.v7.widget.CardView>
+
+    <ImageView
+        android:id="@+id/email.icon.delete"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginRight="64dp"
+        android:alpha="0"
+        android:contentDescription="@string/big_remove_icon"
+        android:src="@drawable/ic_clear_black" />
+
+    <ImageView
+        android:id="@+id/email.icon.check"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:alpha="0"
+        android:contentDescription="@string/big_check_icon"
+        android:src="@drawable/ic_check" />
+
+    <ImageView
+        android:id="@+id/email.icon.inbox"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginStart="64dp"
+        android:alpha="0"
+        android:contentDescription="@string/big_inbox_icon"
+        android:src="@drawable/ic_move_to_inbox" />
+
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
+        android:id="@+id/background_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="48dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="48dp"
+        android:textSize="17sp"
+        android:alpha="0"
+        android:drawableTop="@drawable/ic_check_all"
+        android:layout_gravity="center"
         android:gravity="center"
-        />
+        android:text="@string/error_text" />
 
-</FrameLayout>
+
+</ru.yandex.yamblz.ui.views.MailCardLayout>
