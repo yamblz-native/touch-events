@@ -91,7 +91,7 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
         hideAllIcons();
         if (countOfCards > 0) {
             emailTextView.setScrollY(0);
-            emailCardView.animate().rotation(0).start();
+            emailCardView.setRotation(0);
             emailCardView.setY(cardStartPositionY - 2000);
             emailCardView.setX(cardStartPositionX);
             countOfCards--;
@@ -136,6 +136,12 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
         }
     }
 
+    /**
+     * <p>Return view which which should using now by MailCardView rotation info </p>
+     * And set other view Alpha 0
+     *
+     * @return icon view, which should using now
+     */
     private View getIconByRotation() {
         boolean chooseViewCondition = emailCardView.getRotation() < 0;
         return chooseViewCondition ? inboxIcon : deleteIcon;
@@ -171,37 +177,47 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
     }
 
     /**
-     * <p>Swipe and animate emailCardView</p>
+     * <p>Moving and animate emailCardView</p>
      * <p>
      *
-     * @param value Distance for Scrolling or Velocity in Flinging mode
-     * @param mode  false for Scrolling or true for Flinging
+     * @param value Distance for Scrolling
      */
-    private void moveEmailCardView(float value, boolean mode) {
+    private void moveEmailCardView(float value) {
+        float absCardRotation = Math.abs(emailCardView.getRotation());
         View iconView = getIconByRotation();
-        float offset = 0.9f * value;
-        emailCardView.setX(emailCardView.getX() - offset);
-        emailCardView.setRotation(emailCardView.getRotation() - offset / 13);
+        float postionOffset = 0.9f * value;
+        emailCardView.setX(emailCardView.getX() - postionOffset);
+        emailCardView.setRotation(emailCardView.getRotation() - postionOffset / 13);
 
-        float dAlpha = Math.abs(value) / 140;
-        if (Math.abs(emailCardView.getRotation()) < 10) {
-            iconView.setX(iconView.getX() + value);
-            if (emailCardView.getRotation() < 0) {
-                if (value < 0) {
-                    iconView.setAlpha(iconView.getAlpha() - dAlpha);
-                } else {
-                    iconView.setAlpha(iconView.getAlpha() + dAlpha);
-                }
-            }
-            if (emailCardView.getRotation() > 0) {
-                if (value > 0) {
-                    iconView.setAlpha(iconView.getAlpha() - dAlpha);
-                } else {
-                    iconView.setAlpha(iconView.getAlpha() + dAlpha);
-                }
-            }
+        if (absCardRotation < 11) {
+            iconView.setAlpha(absCardRotation / 10-0.1f);
+        }
+
+        float iconStartPosition = emailCardView.getRotation() < 0 ? inboxIconStartPositionX : deleteIconStartPositionX;
+        float offsetForIcon = cardStartPositionX - emailCardView.getX() + value;
+        iconView.setX(getIconNewX(offsetForIcon, iconView.getWidth(), iconStartPosition));
+    }
+
+
+    /**
+     * <p>Get new X position to icon when moving email card</p>
+     *
+     * @param cardOffset card offset
+     * @param iconWidth  width of icon
+     * @param iconStartX icon start position
+     */
+    private float getIconNewX(float cardOffset, float iconWidth, float iconStartX) {
+        float offset = Math.abs(cardOffset);
+        iconWidth = iconWidth / 2f;
+        if (offset < iconWidth) {
+            return iconStartX + cardOffset;
         } else {
-            iconView.setX(iconView.getX() - value);
+            float delta = (offset - iconWidth) * 0.3f;
+            if (cardOffset < 0) {
+                return Math.min(iconStartX, iconStartX - iconWidth + delta);
+            } else {
+                return Math.max(iconStartX, iconStartX + iconWidth - delta);
+            }
         }
     }
 
@@ -270,7 +286,7 @@ public class MailCardLayout extends FrameLayout implements ShakeDetector.Listene
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if ((scrollModeConstant * Math.abs(distanceX)) > Math.abs(distanceY)) {
-                moveEmailCardView(distanceX, false);
+                moveEmailCardView(distanceX);
             } else {
                 scrollEmailTextView(distanceY, false);
             }
