@@ -13,8 +13,7 @@
         android:layout_marginLeft="160dp"
         android:layout_marginRight="160dp"
         android:layout_marginStart="160dp"
-        android:layout_marginTop="32dp"
-        >
+        android:layout_marginTop="32dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -67,6 +66,7 @@
             android:textColor="@color/black" />
 
         <ImageView
+            android:id="@+id/mail_move_to_inbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
@@ -75,6 +75,7 @@
             android:src="@drawable/ic_move_to_inbox" />
 
         <ImageView
+            android:id="@+id/mail_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
@@ -83,6 +84,7 @@
             android:src="@drawable/ic_check" />
 
         <ImageView
+            android:id="@+id/mail_remove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
@@ -97,13 +99,23 @@
         android:layout_width="128dp"
         android:layout_height="128dp"
         android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
         android:layout_marginEnd="64dp"
         android:layout_marginRight="64dp"
-        android:layout_marginBottom="32dp"
-        android:src="@drawable/ic_clear_black"
+        android:alpha="0"
         android:contentDescription="@string/big_remove_icon"
-        android:alpha="100"
-        />
+        android:src="@drawable/ic_clear_black" />
+
+
+    <ImageView
+        android:id="@+id/email.icon.check"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:alpha="0"
+        android:contentDescription="@string/big_check_icon"
+        android:src="@drawable/ic_check" />
 
 
     <ImageView
@@ -111,18 +123,33 @@
         android:layout_width="128dp"
         android:layout_height="128dp"
         android:layout_gravity="center"
-        android:layout_marginStart="64dp"
-        android:layout_marginLeft="64dp"
         android:layout_marginBottom="32dp"
-        android:src="@drawable/ic_move_to_inbox"
+        android:layout_marginLeft="64dp"
+        android:layout_marginStart="64dp"
+        android:alpha="0"
         android:contentDescription="@string/big_inbox_icon"
-        android:alpha="100"
-        />
+        android:src="@drawable/ic_move_to_inbox" />
 
 
+    <TextView
+        android:id="@+id/background_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="48dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="48dp"
+        android:alpha="0"
+        android:drawableTop="@drawable/ic_check_all"
+        android:gravity="center"
+        android:text="@string/error_text"
+        android:textSize="17sp" />
 
     <Button
+        android:id="@+id/newCard"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/newCard"/>
+        android:layout_height="wrap_content" />
 </ru.yandex.yamblz.ui.views.MailCardLayout>

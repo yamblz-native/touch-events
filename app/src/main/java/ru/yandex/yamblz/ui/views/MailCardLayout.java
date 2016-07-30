@@ -25,6 +25,7 @@ public class MailCardLayout extends FrameLayout {
     private float cardStartPositionY;
     private float deleteIconStartPositionX;
     private float inboxIconStartPositionX;
+    private int countOfCards = 5;
 
     @BindView(R.id.email_card)
     CardView emailCardView;
@@ -36,6 +37,10 @@ public class MailCardLayout extends FrameLayout {
     ImageView deleteIcon;
     @BindView(R.id.email_icon_inbox)
     ImageView inboxIcon;
+    @BindView(R.id.email_icon_check)
+    ImageView checkIcon;
+    @BindView(R.id.background_error)
+    View background_error;
 
     public MailCardLayout(Context context) {
         this(context, null, 0);
@@ -71,7 +76,7 @@ public class MailCardLayout extends FrameLayout {
                 if (Math.abs(offset) < emailCardView.getWidth() / 2.3f) {
                     returnStartLocation();
                 } else {
-                    swipeEmailCardView(-offset, true);
+                    moveEmailCardView(-offset, true);
                 }
         }
         return gestureDetector.onTouchEvent(event);
@@ -79,12 +84,21 @@ public class MailCardLayout extends FrameLayout {
 
     @OnClick(R.id.newCard)
     void returnStartLocation() {
-        emailCardView.animate().cancel();
-        emailCardView.animate()
-                .x(cardStartPositionX)
-                .y(cardStartPositionY)
-                .rotation(0)
-                .start();
+        if (countOfCards > 0) {
+            emailCardView.animate().cancel();
+            emailCardView.setY(cardStartPositionY - 2000);
+            emailCardView.setX(cardStartPositionX);
+            emailCardView.setRotation(0f);
+            emailCardView.animate()
+                    .x(cardStartPositionX)
+                    .y(cardStartPositionY)
+                    .start();
+        } else {
+            background_error.animate()
+                    .alpha(1)
+                    .setDuration(300)
+                    .start();
+        }
         deleteIcon.animate()
                 .x(deleteIconStartPositionX)
                 .alpha(0)
@@ -93,6 +107,60 @@ public class MailCardLayout extends FrameLayout {
                 .x(inboxIconStartPositionX)
                 .alpha(0)
                 .start();
+        checkIcon.animate()
+                .alpha(0)
+                .start();
+
+        countOfCards--;
+    }
+
+
+    @OnClick({R.id.mail_move_to_inbox, R.id.mail_remove, R.id.mail_check})
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.mail_move_to_inbox:
+                swipeEmailCardView(-6000, inboxIcon);
+                break;
+            case R.id.mail_remove:
+                swipeEmailCardView(6000, deleteIcon);
+                break;
+            case R.id.mail_check:
+                swipeEmailCardView(6000, checkIcon);
+                break;
+        }
+    }
+
+    private void swipeEmailCardView(float value, View backView) {
+        float destination = cardStartPositionX + (value > 0 ? 1 : -1) * 2 * emailCardView.getWidth();
+        switch (backView.getId()) {
+            case R.id.email_icon_delete:
+            case R.id.email_icon_inbox:
+                emailCardView.animate().cancel();
+                emailCardView.animate()
+                        .x(destination)
+                        .setDuration(600)
+                        .rotation(value / 600)
+                        .start();
+                backView.animate().cancel();
+                backView.animate()
+                        .x(cardStartPositionX + emailCardView.getMeasuredWidth() / 2 - backView.getMeasuredWidth() / 2)
+                        .setDuration(400)
+                        .alpha(1)
+                        .start();
+                break;
+            case R.id.email_icon_check:
+                emailCardView.animate().cancel();
+                emailCardView.animate()
+                        .y(destination)
+                        .setDuration(300)
+                        .start();
+                backView.animate()
+                        .setDuration(300)
+                        .alpha(1)
+                        .start();
+                break;
+        }
+
     }
 
     /**
@@ -102,25 +170,11 @@ public class MailCardLayout extends FrameLayout {
      * @param value Distance for Scrolling or Velocity in Flinging mode
      * @param mode  false for Scrolling or true for Flinging
      */
-    private void swipeEmailCardView(float value, boolean mode) {
+    private void moveEmailCardView(float value, boolean mode) {
         boolean chooseViewCondition = emailCardView.getRotation() < 0;
         View iconView = chooseViewCondition ? inboxIcon : deleteIcon;
         if (mode) {
-            float destination = cardStartPositionX + (value > 0 ? 1 : -1) * 2 * emailCardView.getWidth();
-            emailCardView.animate().cancel();
-            emailCardView.animate()
-                    .x(destination)
-                    .setDuration(200)
-                    .rotation(value / 600)
-                    .start();
-
-            iconView.animate().cancel();
-            iconView.animate()
-                    .x(cardStartPositionX + emailCardView.getMeasuredWidth() / 2 - iconView.getMeasuredWidth() / 2)
-                    .setDuration(200)
-                    .alpha(1)
-                    .start();
-
+            swipeEmailCardView(value, iconView);
         } else {
             //0,9f for view point maximum stay under finger position
             float offset = 0.9f * value;
@@ -167,7 +221,6 @@ public class MailCardLayout extends FrameLayout {
         int dy = mode ? Math.round(-value / 6) : Math.round(value);
 
         if (dy < 0) { //Upper scroll, check top bound
-            //Check top bound
             dy = (startY + dy < 0) ? -startY : dy;
         } else { //Down scroll, check bottom bound
             int maxScroll = emailTextView.getLineCount() * emailTextView.getLineHeight() - emailTextView.getHeight();
@@ -221,7 +274,7 @@ public class MailCardLayout extends FrameLayout {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if ((scrollModeConstant * Math.abs(distanceX)) > Math.abs(distanceY)) {
-                swipeEmailCardView(distanceX, false);
+                moveEmailCardView(distanceX, false);
             } else {
                 scrollEmailTextView(distanceY, false);
             }
@@ -233,7 +286,7 @@ public class MailCardLayout extends FrameLayout {
             if ((flingModeConstant * Math.abs(velocityX)) > Math.abs(velocityY)) {
                 //If velocity is so small,maybe it's not a swipe
                 if (Math.abs(velocityX) > 5000) {
-                    swipeEmailCardView(velocityX, true);
+                    moveEmailCardView(velocityX, true);
                 }
             } else {
                 scrollEmailTextView(velocityY, true);

@@ -11,4 +11,7 @@
     <string name="author_photo">Photo</string>
     <string name="big_remove_icon">Big remove icon</string>
     <string name="big_inbox_icon">Big inbox icon</string>
+    <string name="big_check_icon">Big check icon</string>
+    <string name="big_check_all_icon">Big chack all icon</string>
+    <string name="error_text">You don\'t have mails more.\n Please come back later</string>
 </resources>
