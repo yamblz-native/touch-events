@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ru.yandex.yamblz.ui.views.MegaCardLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:layout_centerInParent="true">
+
+    <Button
+        android:id ="@+id/delete_button"
+        android:layout_width="@dimen/delete_button_radius"
+        android:layout_height="@dimen/delete_button_radius"
+        android:layout_centerInParent="true"
+        android:text="@string/delete"
+        android:background="@drawable/button_bg_round"
+        />
+
+    <android.support.v7.widget.CardView
+        android:layout_width="270dp"
+        android:layout_height="350dp"
+        android:layout_centerInParent="true"
+        android:id="@+id/maincardview">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/example_str"
+                android:gravity="center"/>
+        </ScrollView>
+
+    </android.support.v7.widget.CardView>
+</ru.yandex.yamblz.ui.views.MegaCardLayout>
