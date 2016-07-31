@@ -1,14 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ru.yandex.yamblz.ui.views.InterceptCardView
+        android:id="@+id/dismiss_view"
+        android:layout_margin="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        app:cardBackgroundColor="@color/white"
+        app:cardUseCompatPadding="true"
+        app:contentPadding="12dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp">
+
+        <ScrollView
+            android:padding="8dp"
+            android:fadingEdge="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/placeholder" />
+
+        </ScrollView>
+
+    </ru.yandex.yamblz.ui.views.InterceptCardView>
+
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
+        android:id="@+id/revealing_view"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        android:background="@drawable/red_round"
+        android:drawablePadding="16dp"
         android:gravity="center"
-        />
+        android:text="Delete"
+        android:textColor="@color/white" />
+
 
 </FrameLayout>
