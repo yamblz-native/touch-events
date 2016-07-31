@@ -19,8 +19,8 @@ import ru.yandex.yamblz.ui.views.SwipeToRevealTouchListener;
 import static ru.yandex.yamblz.App.displayWidth;
 
 public class ContentFragment extends BaseFragment {
-    @BindView(R.id.dismissable_view)
-    View dismissable;
+    @BindView(R.id.dismiss_view)
+    View dismissView;
     @BindView(R.id.revealing_view)
     View revealView;
 
@@ -35,7 +35,7 @@ public class ContentFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         SwipeToRevealTouchListener listener = new SwipeToRevealTouchListener();
         listener.setRevealView(revealView);
-        dismissable.setOnTouchListener(listener);
+        dismissView.setOnTouchListener(listener);
     }
 
     @OnClick(R.id.revealing_view)
@@ -54,9 +54,9 @@ public class ContentFragment extends BaseFragment {
                                 .setInterpolator(new OvershootInterpolator())
                                 .start();
 
-                        dismissable.animate()
+                        dismissView.animate()
                                 .alpha(0)
-                                .translationXBy(getSwipeVelocity(dismissable, 500))
+                                .translationXBy(getSwipeVelocity(dismissView, 500))
                                 .setInterpolator(new AccelerateInterpolator())
                                 .start();
 

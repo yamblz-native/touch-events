@@ -4,6 +4,7 @@ import android.animation.Animator;
 
 /**
  * Created by aleien on 31.07.16.
+ *
  */
 
 public class SimpleAnimator implements Animator.AnimatorListener {
