@@ -1,14 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
+    <ru.yandex.yamblz.ui.views.SwipeView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
-        android:gravity="center"
-        />
+        android:layout_gravity="center">
+
+        <ImageView
+            android:layout_gravity="center"
+            android:id="@+id/back"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@android:drawable/ic_menu_today" />
+
+        <ScrollView
+            android:layout_gravity="center"
+            android:id="@+id/front"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:background="#b707a952">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:text="kjds\nfkhsdifh\nkljsfkd\nsjfknd\nkdsjfhk\njdsfhk\njhkjnfg"
+                android:textSize="48sp" />
+        </ScrollView>
+
+    </ru.yandex.yamblz.ui.views.SwipeView>
 
 </FrameLayout>
