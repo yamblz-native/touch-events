@@ -13,8 +13,7 @@ import timber.log.Timber;
 import static java.lang.Math.*;
 
 /**
- * Created by aleien on 30.07.16.
- */
+ * Created by aleien on 30.07.16. */
 
 public class SwipeToRevealTouchListener implements View.OnTouchListener {
     private float xStartPosition, yStartPosition;
@@ -25,6 +24,7 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
     private float revealAlpha, xRevealPosition;
 
     private WeakReference<View> revealView;
+    private boolean startScroll = true, isScrolling;
 
     private enum ActionType {
         SWIPE,
@@ -44,6 +44,7 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                Timber.d("Swipe to reveal DOWN");
                 v.setPivotX(v.getWidth() / 2);
                 v.setPivotY(v.getHeight() * 2);
                 startRotation = v.getRotation();
@@ -56,8 +57,20 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
                 yStartPosition = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                float scroll = y - yStartPosition;
+                if (startScroll) {
+                    v.setPivotX(v.getWidth() / 2);
+                    v.setPivotY(v.getHeight() * 2);
+                    startRotation = v.getRotation();
 
+                    if (xRevealPosition == 0) {
+                        xRevealPosition = revealView.get().getX();
+                    }
+
+                    xStartPosition = x;
+                    yStartPosition = y;
+                    startScroll = false;
+                    isScrolling = true;
+                }
                 float distance = x - xStartPosition;
                 if (Math.abs(v.getRotation()) < angleThreshold
                         || v.getRotation() >= angleThreshold && distance < 0
@@ -68,12 +81,13 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
                 if (revealView != null && revealView.get() != null) {
                     revealAlpha = abs(v.getRotation() / angleThreshold);
                     revealView.get().setAlpha(revealAlpha);
-                    revealView.get().setX((float) (xRevealPosition + v.getRotation() * 3 * cos(Math.toRadians(v.getRotation() * 12))));
+                    revealView.get().setX((float) (xRevealPosition + v.getRotation() * 6 * cos(Math.toRadians(v.getRotation() * 10))));
 
                 }
+                Timber.d("Swipe to reveal MOVE");
+                Timber.d("Distance: " + distance + ", rotation: " + (xRevealPosition + v.getRotation() * 6 * cos(Math.toRadians(v.getRotation() * 10))));
                 break;
             case MotionEvent.ACTION_UP:
-                Timber.d("Action UP");
                 if (Math.abs(v.getRotation()) < angleThreshold) {
                     v.animate()
                             .translationX(0)
@@ -85,6 +99,9 @@ public class SwipeToRevealTouchListener implements View.OnTouchListener {
                             .translationX(0)
                             .start();
                 }
+
+                startScroll = true;
+                isScrolling = false;
             case MotionEvent.ACTION_CANCEL:
                 break;
         }
