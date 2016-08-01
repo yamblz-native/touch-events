@@ -1,25 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ru.yandex.yamblz.ui.views.SwipeableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipeable_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ru.yandex.yamblz.ui.views.SwipeableCard
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_gravity="center_vertical"
-        android:layout_margin="60dp">
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="20dp"
-                android:text="@string/long_cardview_text"
-                android:textSize="18sp" />
-        </ScrollView>
-    </ru.yandex.yamblz.ui.views.SwipeableCard>
-
-</LinearLayout>
+    android:layout_height="400dp"
+    android:layout_gravity="center_vertical|center_horizontal"/>
