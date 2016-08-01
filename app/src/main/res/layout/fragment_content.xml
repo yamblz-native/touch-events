@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
-        android:gravity="center"
-        />
-
-</FrameLayout>
+<ru.yandex.yamblz.ui.views.SwipeableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipeable_layout"
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    android:layout_gravity="center_vertical|center_horizontal"/>
