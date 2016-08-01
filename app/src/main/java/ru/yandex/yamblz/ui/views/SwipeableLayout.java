@@ -53,7 +53,7 @@ public class SwipeableLayout extends FrameLayout {
     }
 
     private void initView(Context context) {
-        View.inflate(context, R.layout.swipeable_element, this);
+        View.inflate(context, R.layout.swipeable_elements, this);
         ButterKnife.bind(this);
 
         // Set listener to restore view state
