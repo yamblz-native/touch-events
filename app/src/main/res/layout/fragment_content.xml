@@ -3,12 +3,20 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/content"
-        android:textSize="42sp"
-        android:gravity="center"
-        />
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        android:src="@drawable/red_button"
+        android:alpha = "0"
+        android:id="@+id/button_image" />
+
+    <ImageView
+        android:layout_width="225dp"
+        android:layout_height="225dp"
+        android:layout_gravity="center"
+        android:src="@drawable/dummy_image"
+        android:scaleType="centerCrop"
+        android:id="@+id/dummy_image" />
 
 </FrameLayout>
